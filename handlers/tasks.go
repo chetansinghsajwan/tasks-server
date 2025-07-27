@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 	"net/http"
 	"tasks/db"
 	"tasks/sqlc"
@@ -10,15 +13,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-type TaskCreate struct {
-	Title       string    `json:"title" binding:"required"`
-	Description string    `json:"description"`
-	Priority    uint8     `json:"priority"`
-	DueDate     time.Time `json:"due_date"`
-	Assignee    string    `json:"assignee"`
-	Labels      []string  `json:"labels"`
-}
 
 func CreateTask(c *gin.Context) {
 
@@ -69,8 +63,16 @@ func GetTask(c *gin.Context) {
 
 	if err != nil {
 
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+		if errors.Unwrap(err) == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": fmt.Sprintf("Task with id '%d' doesn't exist.", taskId),
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Internal server error",
 		})
 		return
 	}
