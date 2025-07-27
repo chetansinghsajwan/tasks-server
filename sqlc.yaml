@@ -1,0 +1,16 @@
+version: "2"
+
+sql:
+- name: postgres
+  schema: postgres/schema.sql
+  queries: postgres/queries
+  engine: postgresql
+  database:
+    uri: ${DB_CONN_STRING}
+  gen:
+    go:
+      out: sqlc
+      package: sqlc
+      sql_package: pgx/v5
+      emit_db_tags: true
+      emit_json_tags: true

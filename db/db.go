@@ -1,13 +1,14 @@
 package db
 
 import (
-	"database/sql"
+	"context"
 	"os"
+	"tasks/sqlc"
 
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var DB *sql.DB
+var Queries *sqlc.Queries
 
 func Init() {
 
@@ -16,11 +17,18 @@ func Init() {
 		panic("DB_CONN_STRING environment variable is not set")
 	}
 
-	var error error
-	DB, error = sql.Open("postgres", connString)
-	if error != nil {
-		panic("Failed to connect to the database: " + error.Error())
+	var ctx = context.Background()
+
+	pool, err := pgxpool.New(ctx, connString)
+	if err != nil {
+		panic("Failed to connect to the database: " + err.Error())
 	}
+
+	if err := pool.Ping(ctx); err != nil {
+		panic("Failed to ping the database: " + err.Error())
+	}
+
+	Queries = sqlc.New(pool)
 
 	println("Database connection established successfully")
 }

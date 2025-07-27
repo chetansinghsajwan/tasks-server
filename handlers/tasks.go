@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"tasks/db"
+	"tasks/sqlc"
+	"tasks/utils"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +22,10 @@ type TaskCreate struct {
 
 func CreateTask(c *gin.Context) {
 
-	var task TaskCreate
+	var ctx, cancel = context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	var task sqlc.CreateTaskParams
 	var err = c.BindJSON(&task)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -29,15 +35,8 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	var taskId db.TaskID
-	taskId, err = db.CreateTask(db.TaskCreate{
-		Title:       task.Title,
-		Description: &task.Description,
-		Priority:    &task.Priority,
-		DueDate:     &task.DueDate,
-		Assignee:    &task.Assignee,
-		Labels:      task.Labels,
-	})
+	var taskId int32
+	taskId, err = db.Queries.CreateTask(ctx, task)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -54,7 +53,10 @@ func CreateTask(c *gin.Context) {
 
 func GetTask(c *gin.Context) {
 
-	var taskId, err = db.ParseTaskID(c.Param("id"))
+	var ctx, cancel = context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	var taskId, err = utils.ParseInt32(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -62,8 +64,8 @@ func GetTask(c *gin.Context) {
 		return
 	}
 
-	var task *db.Task
-	task, err = db.GetTask(taskId)
+	var task sqlc.Task
+	task, err = db.Queries.GetTask(ctx, taskId)
 
 	if err != nil {
 
@@ -88,16 +90,11 @@ func GetTask(c *gin.Context) {
 
 func UpdateTask(c *gin.Context) {
 
-	var taskId, err = db.ParseTaskID(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+	var ctx, cancel = context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
-		return
-	}
-
-	var taskUpdate db.TaskUpdate
+	var taskUpdate *sqlc.UpdateTaskParams
+	var err error
 	err = c.BindJSON(&taskUpdate)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -107,7 +104,7 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 
-	err = db.UpdateTask(taskId, taskUpdate)
+	err = db.Queries.UpdateTask(ctx, *taskUpdate)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -123,7 +120,10 @@ func UpdateTask(c *gin.Context) {
 
 func DeleteTask(c *gin.Context) {
 
-	var taskId, err = db.ParseTaskID(c.Param("id"))
+	var ctx, cancel = context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	var taskId, err = utils.ParseInt32(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -131,7 +131,7 @@ func DeleteTask(c *gin.Context) {
 		return
 	}
 
-	err = db.DeleteTask(taskId)
+	err = db.Queries.DeleteTask(ctx, taskId)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
