@@ -18,13 +18,13 @@ RETURNING id
 `
 
 type CreateTaskParams struct {
-	Title       string      `db:"title" json:"title"`
-	Description pgtype.Text `db:"description" json:"description"`
-	Priority    pgtype.Int4 `db:"priority" json:"priority"`
-	DueDate     pgtype.Date `db:"due_date" json:"due_date"`
-	Assignee    pgtype.Text `db:"assignee" json:"assignee"`
-	Labels      []string    `db:"labels" json:"labels"`
-	ListID      pgtype.Int8 `db:"list_id" json:"list_id"`
+	Title       string           `db:"title" json:"title"`
+	Description pgtype.Text      `db:"description" json:"description"`
+	Priority    pgtype.Int4      `db:"priority" json:"priority"`
+	DueDate     pgtype.Timestamp `db:"due_date" json:"due_date"`
+	Assignee    pgtype.Text      `db:"assignee" json:"assignee"`
+	Labels      []string         `db:"labels" json:"labels"`
+	ListID      pgtype.Int8      `db:"list_id" json:"list_id"`
 }
 
 func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (int32, error) {
@@ -192,14 +192,14 @@ WHERE id = $8
 `
 
 type UpdateTaskParams struct {
-	Title       string      `db:"title" json:"title"`
-	Description pgtype.Text `db:"description" json:"description"`
-	Priority    pgtype.Int4 `db:"priority" json:"priority"`
-	DueDate     pgtype.Date `db:"due_date" json:"due_date"`
-	Assignee    pgtype.Text `db:"assignee" json:"assignee"`
-	Labels      []string    `db:"labels" json:"labels"`
-	ListID      pgtype.Int8 `db:"list_id" json:"list_id"`
-	ID          int32       `db:"id" json:"id"`
+	Title       string           `db:"title" json:"title"`
+	Description pgtype.Text      `db:"description" json:"description"`
+	Priority    pgtype.Int4      `db:"priority" json:"priority"`
+	DueDate     pgtype.Timestamp `db:"due_date" json:"due_date"`
+	Assignee    pgtype.Text      `db:"assignee" json:"assignee"`
+	Labels      []string         `db:"labels" json:"labels"`
+	ListID      pgtype.Int8      `db:"list_id" json:"list_id"`
+	ID          int32            `db:"id" json:"id"`
 }
 
 func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) error {
@@ -229,14 +229,14 @@ WHERE id = ANY($8::int[])
 `
 
 type UpdateTasksParams struct {
-	Title       string      `db:"title" json:"title"`
-	Description pgtype.Text `db:"description" json:"description"`
-	Priority    pgtype.Int4 `db:"priority" json:"priority"`
-	DueDate     pgtype.Date `db:"due_date" json:"due_date"`
-	Assignee    pgtype.Text `db:"assignee" json:"assignee"`
-	Labels      []string    `db:"labels" json:"labels"`
-	ListID      pgtype.Int8 `db:"list_id" json:"list_id"`
-	Ids         []int32     `db:"ids" json:"ids"`
+	Title       string           `db:"title" json:"title"`
+	Description pgtype.Text      `db:"description" json:"description"`
+	Priority    pgtype.Int4      `db:"priority" json:"priority"`
+	DueDate     pgtype.Timestamp `db:"due_date" json:"due_date"`
+	Assignee    pgtype.Text      `db:"assignee" json:"assignee"`
+	Labels      []string         `db:"labels" json:"labels"`
+	ListID      pgtype.Int8      `db:"list_id" json:"list_id"`
+	Ids         []int32          `db:"ids" json:"ids"`
 }
 
 func (q *Queries) UpdateTasks(ctx context.Context, arg UpdateTasksParams) error {

@@ -25,14 +25,14 @@ type ListPermission struct {
 }
 
 type Task struct {
-	ID          int32       `db:"id" json:"id"`
-	ListID      pgtype.Int8 `db:"list_id" json:"list_id"`
-	Title       string      `db:"title" json:"title"`
-	Description pgtype.Text `db:"description" json:"description"`
-	Priority    pgtype.Int4 `db:"priority" json:"priority"`
-	DueDate     pgtype.Date `db:"due_date" json:"due_date"`
-	Assignee    pgtype.Text `db:"assignee" json:"assignee"`
-	Labels      []string    `db:"labels" json:"labels"`
+	ID          int32            `db:"id" json:"id"`
+	ListID      pgtype.Int8      `db:"list_id" json:"list_id"`
+	Title       string           `db:"title" json:"title"`
+	Description pgtype.Text      `db:"description" json:"description"`
+	Priority    pgtype.Int4      `db:"priority" json:"priority"`
+	DueDate     pgtype.Timestamp `db:"due_date" json:"due_date"`
+	Assignee    pgtype.Text      `db:"assignee" json:"assignee"`
+	Labels      []string         `db:"labels" json:"labels"`
 }
 
 type User struct {

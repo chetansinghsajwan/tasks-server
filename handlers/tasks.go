@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func CreateTask(c *gin.Context) {
@@ -33,6 +34,19 @@ func CreateTask(c *gin.Context) {
 	taskId, err = db.Queries.CreateTask(ctx, task)
 
 	if err != nil {
+
+		var pgerr *pgconn.PgError
+		if errors.As(err, &pgerr) {
+
+			if pgerr.Code == "25303" && pgerr.ColumnName == "" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": pgerr.Detail,
+				})
+
+				return
+			}
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})

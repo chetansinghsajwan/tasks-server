@@ -2,7 +2,7 @@ CREATE TABLE users (
     id            TEXT PRIMARY KEY,
     full_name     TEXT NOT NULL,
     display_name  TEXT,
-    email         TEXT NOT NULL
+    email         TEXT UNIQUE NOT NULL
 );
 
 CREATE TABLE lists (
@@ -18,7 +18,7 @@ CREATE TABLE tasks (
     title        TEXT NOT NULL,
     description  TEXT,
     priority     INTEGER,
-    due_date     DATE,
+    due_date     TIMESTAMP,
     assignee     TEXT REFERENCES users(id),
     labels       TEXT[]
 );
