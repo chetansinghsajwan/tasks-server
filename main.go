@@ -25,6 +25,8 @@ func setupRouter() *gin.Engine {
 	r.GET("/lists/:id", handlers.GetList)
 	r.PATCH("/lists", handlers.UpdateList)
 	r.DELETE("/lists/:id", handlers.DeleteList)
+	r.GET("/lists/access/:listid/:userid", handlers.GetListAccess)
+	r.PUT("/lists/access/:listid/:userid", handlers.SetListAccess)
 
 	return r
 }

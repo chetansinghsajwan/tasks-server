@@ -23,12 +23,12 @@ CREATE TABLE tasks (
     labels       TEXT[]
 );
 
-CREATE TABLE list_permissions (
+CREATE TABLE list_access (
     user_id            TEXT REFERENCES users(id),
     list_id            BIGINT REFERENCES lists(id),
-    can_read_tasks     BOOLEAN DEFAULT FALSE,
-    can_update_tasks   BOOLEAN DEFAULT FALSE,
-    can_create_tasks   BOOLEAN DEFAULT FALSE,
-    can_delete_tasks   BOOLEAN DEFAULT FALSE,
+    can_read_tasks     BOOLEAN NOT NULl DEFAULT FALSE,
+    can_update_tasks   BOOLEAN NOT NULl DEFAULT FALSE,
+    can_create_tasks   BOOLEAN NOT NULl DEFAULT FALSE,
+    can_delete_tasks   BOOLEAN NOT NULl DEFAULT FALSE,
     PRIMARY KEY (user_id, list_id)
 );

@@ -16,10 +16,12 @@ import (
 )
 
 const (
-	CreateListRequestTimeout = time.Second * 5
-	GetListRequestTimeout    = time.Second * 5
-	UpdateListRequestTimeout = time.Second * 5
-	DeleteListRequestTimeout = time.Second * 5
+	CreateListRequestTimeout    = time.Second * 5
+	GetListRequestTimeout       = time.Second * 5
+	UpdateListRequestTimeout    = time.Second * 5
+	DeleteListRequestTimeout    = time.Second * 5
+	GetListAccessRequestTimeout = time.Second * 5
+	SetListAccessRequestTimeout = time.Second * 5
 )
 
 func CreateList(c *gin.Context) {
@@ -168,4 +170,104 @@ func DeleteList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
+}
+
+func GetListAccess(c *gin.Context) {
+
+	var ctx, cancel = context.WithTimeout(
+		context.Background(), GetListAccessRequestTimeout)
+
+	defer cancel()
+
+	var userid = c.Param("userid")
+	if userid == "" {
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "userid must not be empty.",
+		})
+		return
+	}
+
+	var listid, err = utils.ParseInt64(c.Param("listid"))
+	if err != nil {
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var params = sqlc.GetListAccessParams{
+		UserID: userid,
+		ListID: listid,
+	}
+
+	var access sqlc.ListAccess
+	access, err = db.Queries.GetListAccess(ctx, params)
+	if err != nil {
+
+		if errors.Unwrap(err) == sql.ErrNoRows {
+
+			access = sqlc.ListAccess{
+				UserID:         userid,
+				ListID:         listid,
+				CanReadTasks:   false,
+				CanUpdateTasks: false,
+				CanCreateTasks: false,
+				CanDeleteTasks: false,
+			}
+		} else {
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"access": access,
+	})
+}
+
+func SetListAccess(c *gin.Context) {
+
+	var ctx, cancel = context.WithTimeout(
+		context.Background(), GetListAccessRequestTimeout)
+
+	defer cancel()
+
+	var userid = c.Param("userid")
+	if userid == "" {
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "userid must not be empty.",
+		})
+		return
+	}
+
+	var listid, err = utils.ParseInt64(c.Param("listid"))
+	if err != nil {
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var params = sqlc.SetListAccessParams{
+		UserID: userid,
+		ListID: listid,
+	}
+
+	err = db.Queries.SetListAccess(ctx, params)
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

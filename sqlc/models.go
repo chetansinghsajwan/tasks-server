@@ -15,13 +15,13 @@ type List struct {
 	CreatedAt pgtype.Timestamp `db:"created_at" json:"created_at"`
 }
 
-type ListPermission struct {
-	UserID         string      `db:"user_id" json:"user_id"`
-	ListID         int64       `db:"list_id" json:"list_id"`
-	CanReadTasks   pgtype.Bool `db:"can_read_tasks" json:"can_read_tasks"`
-	CanUpdateTasks pgtype.Bool `db:"can_update_tasks" json:"can_update_tasks"`
-	CanCreateTasks pgtype.Bool `db:"can_create_tasks" json:"can_create_tasks"`
-	CanDeleteTasks pgtype.Bool `db:"can_delete_tasks" json:"can_delete_tasks"`
+type ListAccess struct {
+	UserID         string `db:"user_id" json:"user_id"`
+	ListID         int64  `db:"list_id" json:"list_id"`
+	CanReadTasks   bool   `db:"can_read_tasks" json:"can_read_tasks"`
+	CanUpdateTasks bool   `db:"can_update_tasks" json:"can_update_tasks"`
+	CanCreateTasks bool   `db:"can_create_tasks" json:"can_create_tasks"`
+	CanDeleteTasks bool   `db:"can_delete_tasks" json:"can_delete_tasks"`
 }
 
 type Task struct {

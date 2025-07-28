@@ -66,6 +66,30 @@ func (q *Queries) GetList(ctx context.Context, id int64) (List, error) {
 	return i, err
 }
 
+const getListAccess = `-- name: GetListAccess :one
+SELECT user_id, list_id, can_read_tasks, can_update_tasks, can_create_tasks, can_delete_tasks FROM list_access
+WHERE user_id = $1 AND list_id = $2
+`
+
+type GetListAccessParams struct {
+	UserID string `db:"user_id" json:"user_id"`
+	ListID int64  `db:"list_id" json:"list_id"`
+}
+
+func (q *Queries) GetListAccess(ctx context.Context, arg GetListAccessParams) (ListAccess, error) {
+	row := q.db.QueryRow(ctx, getListAccess, arg.UserID, arg.ListID)
+	var i ListAccess
+	err := row.Scan(
+		&i.UserID,
+		&i.ListID,
+		&i.CanReadTasks,
+		&i.CanUpdateTasks,
+		&i.CanCreateTasks,
+		&i.CanDeleteTasks,
+	)
+	return i, err
+}
+
 const getListWhere = `-- name: GetListWhere :one
 SELECT id, owner_id, name, created_at FROM lists
 WHERE $1
@@ -148,6 +172,39 @@ func (q *Queries) GetListsWhere(ctx context.Context, arg GetListsWhereParams) ([
 		return nil, err
 	}
 	return items, nil
+}
+
+const setListAccess = `-- name: SetListAccess :exec
+INSERT INTO list_access (user_id, list_id, can_read_tasks, can_update_tasks, can_create_tasks, can_delete_tasks)
+VALUES ($1, $2, $3, $4, $5, $6)
+
+ON CONFLICT(user_id, list_id) DO
+
+UPDATE SET can_read_tasks = EXCLUDED.can_read_tasks
+    , can_update_tasks = EXCLUDED.can_update_tasks
+    , can_create_tasks = EXCLUDED.can_create_tasks
+    , can_delete_tasks = EXCLUDED.can_delete_tasks
+`
+
+type SetListAccessParams struct {
+	UserID         string `db:"user_id" json:"user_id"`
+	ListID         int64  `db:"list_id" json:"list_id"`
+	CanReadTasks   bool   `db:"can_read_tasks" json:"can_read_tasks"`
+	CanUpdateTasks bool   `db:"can_update_tasks" json:"can_update_tasks"`
+	CanCreateTasks bool   `db:"can_create_tasks" json:"can_create_tasks"`
+	CanDeleteTasks bool   `db:"can_delete_tasks" json:"can_delete_tasks"`
+}
+
+func (q *Queries) SetListAccess(ctx context.Context, arg SetListAccessParams) error {
+	_, err := q.db.Exec(ctx, setListAccess,
+		arg.UserID,
+		arg.ListID,
+		arg.CanReadTasks,
+		arg.CanUpdateTasks,
+		arg.CanCreateTasks,
+		arg.CanDeleteTasks,
+	)
+	return err
 }
 
 const updateList = `-- name: UpdateList :exec
