@@ -10,7 +10,7 @@ import (
 
 type List struct {
 	ID        int64            `db:"id" json:"id"`
-	OwnerID   pgtype.Text      `db:"owner_id" json:"owner_id"`
+	OwnerID   string           `db:"owner_id" json:"owner_id"`
 	Name      string           `db:"name" json:"name"`
 	CreatedAt pgtype.Timestamp `db:"created_at" json:"created_at"`
 }
@@ -25,8 +25,8 @@ type ListPermission struct {
 }
 
 type Task struct {
-	ID          int32            `db:"id" json:"id"`
-	ListID      pgtype.Int8      `db:"list_id" json:"list_id"`
+	ID          int64            `db:"id" json:"id"`
+	ListID      int64            `db:"list_id" json:"list_id"`
 	Title       string           `db:"title" json:"title"`
 	Description pgtype.Text      `db:"description" json:"description"`
 	Priority    pgtype.Int4      `db:"priority" json:"priority"`

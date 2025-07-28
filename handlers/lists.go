@@ -16,21 +16,21 @@ import (
 )
 
 const (
-	CreateTaskRequestTimeout = time.Second * 5
-	GetTaskRequestTimeout    = time.Second * 5
-	UpdateTaskRequestTimeout = time.Second * 5
-	DeleteTaskRequestTimeout = time.Second * 5
+	CreateListRequestTimeout = time.Second * 5
+	GetListRequestTimeout    = time.Second * 5
+	UpdateListRequestTimeout = time.Second * 5
+	DeleteListRequestTimeout = time.Second * 5
 )
 
-func CreateTask(c *gin.Context) {
+func CreateList(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(
-		context.Background(), CreateTaskRequestTimeout)
+		context.Background(), CreateListRequestTimeout)
 
 	defer cancel()
 
-	var task sqlc.CreateTaskParams
-	var err = c.BindJSON(&task)
+	var list sqlc.CreateListParams
+	var err = c.BindJSON(&list)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -39,8 +39,8 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	var taskId int64
-	taskId, err = db.Queries.CreateTask(ctx, task)
+	var listId int64
+	listId, err = db.Queries.CreateList(ctx, list)
 
 	if err != nil {
 
@@ -64,18 +64,18 @@ func CreateTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"taskId": taskId,
+		"listId": listId,
 	})
 }
 
-func GetTask(c *gin.Context) {
+func GetList(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(
-		context.Background(), GetTaskRequestTimeout)
+		context.Background(), GetListRequestTimeout)
 
 	defer cancel()
 
-	var taskId, err = utils.ParseInt64(c.Param("id"))
+	var listId, err = utils.ParseInt64(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -83,14 +83,14 @@ func GetTask(c *gin.Context) {
 		return
 	}
 
-	var task sqlc.Task
-	task, err = db.Queries.GetTask(ctx, taskId)
+	var list sqlc.List
+	list, err = db.Queries.GetList(ctx, listId)
 
 	if err != nil {
 
 		if errors.Unwrap(err) == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{
-				"error": fmt.Sprintf("Task with id '%d' doesn't exist.", taskId),
+				"error": fmt.Sprintf("List with id '%d' doesn't exist.", listId),
 			})
 
 			return
@@ -103,28 +103,24 @@ func GetTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"task": gin.H{
-			"id":          task.ID,
-			"title":       task.Title,
-			"description": task.Description,
-			"priority":    task.Priority,
-			"dueDate":     task.DueDate,
-			"assignee":    task.Assignee,
-			"labels":      task.Labels,
+		"list": gin.H{
+			"id":       list.ID,
+			"owner_id": list.OwnerID,
+			"name":     list.Name,
 		},
 	})
 }
 
-func UpdateTask(c *gin.Context) {
+func UpdateList(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(
-		context.Background(), UpdateTaskRequestTimeout)
+		context.Background(), UpdateListRequestTimeout)
 
 	defer cancel()
 
-	var taskUpdate *sqlc.UpdateTaskParams
+	var listUpdate *sqlc.UpdateListParams
 	var err error
-	err = c.BindJSON(&taskUpdate)
+	err = c.BindJSON(&listUpdate)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -133,7 +129,7 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 
-	err = db.Queries.UpdateTask(ctx, *taskUpdate)
+	err = db.Queries.UpdateList(ctx, *listUpdate)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -143,18 +139,18 @@ func UpdateTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Task updated successfully",
+		"message": "List updated successfully",
 	})
 }
 
-func DeleteTask(c *gin.Context) {
+func DeleteList(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(
-		context.Background(), DeleteTaskRequestTimeout)
+		context.Background(), DeleteListRequestTimeout)
 
 	defer cancel()
 
-	var taskId, err = utils.ParseInt64(c.Param("id"))
+	var listId, err = utils.ParseInt64(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -162,7 +158,7 @@ func DeleteTask(c *gin.Context) {
 		return
 	}
 
-	err = db.Queries.DeleteTask(ctx, taskId)
+	err = db.Queries.DeleteList(ctx, listId)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

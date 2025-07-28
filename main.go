@@ -21,6 +21,11 @@ func setupRouter() *gin.Engine {
 	r.PATCH("/users", handlers.UpdateUser)
 	r.DELETE("/users/:id", handlers.DeleteUser)
 
+	r.POST("/lists", handlers.CreateList)
+	r.GET("/lists/:id", handlers.GetList)
+	r.PATCH("/lists", handlers.UpdateList)
+	r.DELETE("/lists/:id", handlers.DeleteList)
+
 	return r
 }
 

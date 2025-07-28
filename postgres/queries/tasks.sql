@@ -4,7 +4,7 @@ WHERE id = @id;
 
 -- name: GetTasks :many
 SELECT * FROM tasks
-WHERE id = ANY(@ids::int[]);
+WHERE id = ANY(@ids::bigint[]);
 
 -- name: GetTaskWhere :one
 SELECT * FROM tasks
@@ -41,7 +41,7 @@ UPDATE tasks SET
     assignee = @assignee,
     labels = @labels,
     list_id = @list_id
-WHERE id = ANY(@ids::int[]);
+WHERE id = ANY(@ids::bigint[]);
 
 -- name: DeleteTask :exec
 DELETE FROM tasks
@@ -49,4 +49,4 @@ WHERE id = @id;
 
 -- name: DeleteTasks :exec
 DELETE FROM tasks
-WHERE id = ANY(@ids::int[]);
+WHERE id = ANY(@ids::bigint[]);

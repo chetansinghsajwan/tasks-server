@@ -7,14 +7,14 @@ CREATE TABLE users (
 
 CREATE TABLE lists (
     id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    owner_id    TEXT REFERENCES users(id),
+    owner_id    TEXT NOT NULL REFERENCES users(id),
     name        TEXT NOT NULL,
     created_at  TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE tasks (
-    id           INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    list_id      BIGINT REFERENCES lists(id),
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    list_id      BIGINT NOT NULL REFERENCES lists(id),
     title        TEXT NOT NULL,
     description  TEXT,
     priority     INTEGER,

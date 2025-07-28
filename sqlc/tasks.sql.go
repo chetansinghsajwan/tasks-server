@@ -24,10 +24,10 @@ type CreateTaskParams struct {
 	DueDate     pgtype.Timestamp `db:"due_date" json:"due_date"`
 	Assignee    pgtype.Text      `db:"assignee" json:"assignee"`
 	Labels      []string         `db:"labels" json:"labels"`
-	ListID      pgtype.Int8      `db:"list_id" json:"list_id"`
+	ListID      int64            `db:"list_id" json:"list_id"`
 }
 
-func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (int32, error) {
+func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (int64, error) {
 	row := q.db.QueryRow(ctx, createTask,
 		arg.Title,
 		arg.Description,
@@ -37,7 +37,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (int32, 
 		arg.Labels,
 		arg.ListID,
 	)
-	var id int32
+	var id int64
 	err := row.Scan(&id)
 	return id, err
 }
@@ -47,17 +47,17 @@ DELETE FROM tasks
 WHERE id = $1
 `
 
-func (q *Queries) DeleteTask(ctx context.Context, id int32) error {
+func (q *Queries) DeleteTask(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteTask, id)
 	return err
 }
 
 const deleteTasks = `-- name: DeleteTasks :exec
 DELETE FROM tasks
-WHERE id = ANY($1::int[])
+WHERE id = ANY($1::bigint[])
 `
 
-func (q *Queries) DeleteTasks(ctx context.Context, ids []int32) error {
+func (q *Queries) DeleteTasks(ctx context.Context, ids []int64) error {
 	_, err := q.db.Exec(ctx, deleteTasks, ids)
 	return err
 }
@@ -67,7 +67,7 @@ SELECT id, list_id, title, description, priority, due_date, assignee, labels FRO
 WHERE id = $1
 `
 
-func (q *Queries) GetTask(ctx context.Context, id int32) (Task, error) {
+func (q *Queries) GetTask(ctx context.Context, id int64) (Task, error) {
 	row := q.db.QueryRow(ctx, getTask, id)
 	var i Task
 	err := row.Scan(
@@ -107,10 +107,10 @@ func (q *Queries) GetTaskWhere(ctx context.Context, filter pgtype.Bool) (Task, e
 
 const getTasks = `-- name: GetTasks :many
 SELECT id, list_id, title, description, priority, due_date, assignee, labels FROM tasks
-WHERE id = ANY($1::int[])
+WHERE id = ANY($1::bigint[])
 `
 
-func (q *Queries) GetTasks(ctx context.Context, ids []int32) ([]Task, error) {
+func (q *Queries) GetTasks(ctx context.Context, ids []int64) ([]Task, error) {
 	rows, err := q.db.Query(ctx, getTasks, ids)
 	if err != nil {
 		return nil, err
@@ -198,8 +198,8 @@ type UpdateTaskParams struct {
 	DueDate     pgtype.Timestamp `db:"due_date" json:"due_date"`
 	Assignee    pgtype.Text      `db:"assignee" json:"assignee"`
 	Labels      []string         `db:"labels" json:"labels"`
-	ListID      pgtype.Int8      `db:"list_id" json:"list_id"`
-	ID          int32            `db:"id" json:"id"`
+	ListID      int64            `db:"list_id" json:"list_id"`
+	ID          int64            `db:"id" json:"id"`
 }
 
 func (q *Queries) UpdateTask(ctx context.Context, arg UpdateTaskParams) error {
@@ -225,7 +225,7 @@ UPDATE tasks SET
     assignee = $5,
     labels = $6,
     list_id = $7
-WHERE id = ANY($8::int[])
+WHERE id = ANY($8::bigint[])
 `
 
 type UpdateTasksParams struct {
@@ -235,8 +235,8 @@ type UpdateTasksParams struct {
 	DueDate     pgtype.Timestamp `db:"due_date" json:"due_date"`
 	Assignee    pgtype.Text      `db:"assignee" json:"assignee"`
 	Labels      []string         `db:"labels" json:"labels"`
-	ListID      pgtype.Int8      `db:"list_id" json:"list_id"`
-	Ids         []int32          `db:"ids" json:"ids"`
+	ListID      int64            `db:"list_id" json:"list_id"`
+	Ids         []int64          `db:"ids" json:"ids"`
 }
 
 func (q *Queries) UpdateTasks(ctx context.Context, arg UpdateTasksParams) error {

@@ -18,8 +18,8 @@ RETURNING id
 `
 
 type CreateListParams struct {
-	OwnerID pgtype.Text `db:"owner_id" json:"owner_id"`
-	Name    string      `db:"name" json:"name"`
+	OwnerID string `db:"owner_id" json:"owner_id"`
+	Name    string `db:"name" json:"name"`
 }
 
 func (q *Queries) CreateList(ctx context.Context, arg CreateListParams) (int64, error) {
@@ -158,9 +158,9 @@ WHERE id = $3
 `
 
 type UpdateListParams struct {
-	OwnerID pgtype.Text `db:"owner_id" json:"owner_id"`
-	Name    string      `db:"name" json:"name"`
-	ID      int64       `db:"id" json:"id"`
+	OwnerID string `db:"owner_id" json:"owner_id"`
+	Name    string `db:"name" json:"name"`
+	ID      int64  `db:"id" json:"id"`
 }
 
 func (q *Queries) UpdateList(ctx context.Context, arg UpdateListParams) error {
@@ -176,9 +176,9 @@ WHERE id = ANY($3::bigint[])
 `
 
 type UpdateListsParams struct {
-	OwnerID pgtype.Text `db:"owner_id" json:"owner_id"`
-	Name    string      `db:"name" json:"name"`
-	Ids     []int64     `db:"ids" json:"ids"`
+	OwnerID string  `db:"owner_id" json:"owner_id"`
+	Name    string  `db:"name" json:"name"`
+	Ids     []int64 `db:"ids" json:"ids"`
 }
 
 func (q *Queries) UpdateLists(ctx context.Context, arg UpdateListsParams) error {
