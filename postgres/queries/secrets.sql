@@ -2,7 +2,7 @@
 INSERT INTO secrets (key, scope, value)
 VALUES (@key, @scope, @pass);
 
--- name: GetSercert :one
+-- name: GetSecret :one
 SELECT value
 FROM secrets
 WHERE key = @key AND scope = @scope;

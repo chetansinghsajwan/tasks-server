@@ -42,19 +42,19 @@ func (q *Queries) DeleteSecret(ctx context.Context, arg DeleteSecretParams) erro
 	return err
 }
 
-const getSercert = `-- name: GetSercert :one
+const getSecret = `-- name: GetSecret :one
 SELECT value
 FROM secrets
 WHERE key = $1 AND scope = $2
 `
 
-type GetSercertParams struct {
+type GetSecretParams struct {
 	Key   string       `db:"key" json:"key"`
 	Scope SecretScopes `db:"scope" json:"scope"`
 }
 
-func (q *Queries) GetSercert(ctx context.Context, arg GetSercertParams) (string, error) {
-	row := q.db.QueryRow(ctx, getSercert, arg.Key, arg.Scope)
+func (q *Queries) GetSecret(ctx context.Context, arg GetSecretParams) (string, error) {
+	row := q.db.QueryRow(ctx, getSecret, arg.Key, arg.Scope)
 	var value string
 	err := row.Scan(&value)
 	return value, err
