@@ -5,8 +5,52 @@
 package sqlc
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type SecretScopes string
+
+const (
+	SecretScopesUserLogin SecretScopes = "user-login"
+)
+
+func (e *SecretScopes) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = SecretScopes(s)
+	case string:
+		*e = SecretScopes(s)
+	default:
+		return fmt.Errorf("unsupported scan type for SecretScopes: %T", src)
+	}
+	return nil
+}
+
+type NullSecretScopes struct {
+	SecretScopes SecretScopes `json:"secret_scopes"`
+	Valid        bool         `json:"valid"` // Valid is true if SecretScopes is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullSecretScopes) Scan(value interface{}) error {
+	if value == nil {
+		ns.SecretScopes, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.SecretScopes.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullSecretScopes) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.SecretScopes), nil
+}
 
 type List struct {
 	ID        int64            `db:"id" json:"id"`
@@ -22,6 +66,12 @@ type ListAccess struct {
 	CanUpdateTasks bool   `db:"can_update_tasks" json:"can_update_tasks"`
 	CanCreateTasks bool   `db:"can_create_tasks" json:"can_create_tasks"`
 	CanDeleteTasks bool   `db:"can_delete_tasks" json:"can_delete_tasks"`
+}
+
+type Secret struct {
+	Key   string       `db:"key" json:"key"`
+	Scope SecretScopes `db:"scope" json:"scope"`
+	Value string       `db:"value" json:"value"`
 }
 
 type Task struct {

@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -17,18 +19,29 @@ const (
 	GetUserRequestTimeout    = time.Second * 5
 	UpdateUserRequestTimeout = time.Second * 5
 	DeleteUserRequestTimeout = time.Second * 5
+	BcryptUserEncryptionCost = bcrypt.DefaultCost
 )
+
+type CreateUserBody struct {
+	ID          string `json:"id"`
+	Pass        string `json:"pass"`
+	FullName    string `json:"full_name"`
+	DisplayName string `json:"display_name"`
+	Email       string `json:"email"`
+}
 
 func CreateUser(c *gin.Context) {
 
+	// Setup context
 	var ctx, cancel = context.WithTimeout(
 		context.Background(), CreateUserRequestTimeout,
 	)
 
 	defer cancel()
 
-	var createUserParams sqlc.CreateUserParams
-	if err := c.BindJSON(&createUserParams); err != nil {
+	// Parse request body
+	var body CreateUserBody
+	if err := c.BindJSON(&body); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -36,11 +49,63 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	if err := db.Queries.CreateUser(ctx, createUserParams); err != nil {
+	// Create the transaction
+	var queries, err = db.Begin(ctx)
+	if err != nil {
 
-		// var pgerr *pgconn.PgError
-		// if errors.As(err, &pgerr) {
-		// }
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	defer queries.Tx.Rollback(ctx)
+
+	// Create user
+	var createUserParams = sqlc.CreateUserParams{
+		ID:          body.ID,
+		FullName:    body.FullName,
+		DisplayName: pgtype.Text{String: body.DisplayName, Valid: true},
+		Email:       body.Email,
+	}
+	if err := queries.Queries.CreateUser(ctx, createUserParams); err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+
+		return
+	}
+
+	// Encrypt the password
+	var hashedPass []byte
+	hashedPass, err = bcrypt.GenerateFromPassword(
+		[]byte(body.Pass), BcryptUserEncryptionCost)
+
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Create user secrets
+	var createSecretParams = sqlc.CreateSecretParams{
+		Key:   body.ID,
+		Scope: "user-login",
+		Pass:  string(hashedPass),
+	}
+	if err := queries.Queries.CreateSecret(ctx, createSecretParams); err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Commit the transaction
+	if err = queries.Tx.Commit(ctx); err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

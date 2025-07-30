@@ -5,6 +5,17 @@ CREATE TABLE users (
     email         TEXT UNIQUE NOT NULL
 );
 
+CREATE TYPE secret_scopes as ENUM (
+    'user-login'
+);
+
+CREATE TABLE secrets (
+    key           TEXT NOT NULL,
+    scope         secret_scopes NOT NULL,
+    value         TEXT NOT NULL,
+    PRIMARY KEY (key, scope)
+);
+
 CREATE TABLE lists (
     id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     owner_id    TEXT NOT NULL REFERENCES users(id),
