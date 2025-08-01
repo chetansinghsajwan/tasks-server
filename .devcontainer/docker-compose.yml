@@ -1,6 +1,8 @@
 services:
   server:
-    image: mcr.microsoft.com/vscode/devcontainers/go:1.24-bookworm
+    build:
+      dockerfile: .devcontainer/dockerfile
+      context: ..
     volumes:
       - ..:/workspace:cached
     working_dir: /workspace
