@@ -1,3 +1,7 @@
 {
-    "image": "mcr.microsoft.com/vscode/devcontainers/go:1.24-bookworm"
+  "name": "tasks-server-dev",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "server",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [5432] // for postgres
 }

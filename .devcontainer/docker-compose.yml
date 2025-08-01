@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  server:
+    image: mcr.microsoft.com/vscode/devcontainers/go:1.24-bookworm
+    volumes:
+      - ..:/workspace:cached
+    working_dir: /workspace
+    depends_on:
+      - database
+    environment:
+      - DATABASE_URL=postgres://dev:dev@database:5432/devdb?sslmode=disable
+    command: sleep infinity
+
+  database:
+    image: docker.io/postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: devdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

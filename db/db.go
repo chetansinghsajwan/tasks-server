@@ -15,9 +15,9 @@ var Pool *pgxpool.Pool
 
 func Init() {
 
-	var connString = os.Getenv("DB_CONN_STRING")
+	var connString = os.Getenv("DATABASE_URL")
 	if connString == "" {
-		panic("DB_CONN_STRING environment variable is not set")
+		panic("DATABASE_URL environment variable is not set")
 	}
 
 	var ctx = context.Background()
