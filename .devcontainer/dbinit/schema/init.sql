@@ -1,59 +1,96 @@
-CREATE OR REPLACE FUNCTION reinitialize_schema()
-RETURNS void AS $$
-BEGIN
-    DROP TABLE IF EXISTS list_access;
-    DROP TABLE IF EXISTS tasks;
-    DROP TABLE IF EXISTS lists;
-    DROP TABLE IF EXISTS secrets;
-    DROP TABLE IF EXISTS users;
-    DROP TYPE IF EXISTS secret_scopes;
+create or replace function reinitialize_schema()
+returns void as $$
+begin
+    drop table if exists list_access;
+    drop table if exists tasks;
+    drop table if exists lists;
+    drop table if exists secrets;
+    drop table if exists users;
+    drop type if exists secret_scopes;
 
-    CREATE TABLE users (
-        id            TEXT PRIMARY KEY,
-        full_name     TEXT NOT NULL,
-        display_name  TEXT,
-        email         TEXT UNIQUE NOT NULL
+    create table users (
+        id            text primary key,
+        email         text unique not null,
+        full_name     text not null,
+        display_name  text,
+
+        constraint users_id_validation check (
+            length(trim(id)) != 0 and
+            id ~ '^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$' and
+            id !~ '--+'
+        ),
+
+        constraint users_email_validation check (
+            length(trim(email)) != 0 and
+            email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+        ),
+
+        constraint users_full_name_validation check (
+            length(trim(full_name)) != 0
+        ),
+
+        constraint users_display_name_validation check (
+            display_name is null or length(trim(display_name)) != 0
+        )
     );
 
-    CREATE TYPE secret_scopes AS ENUM (
+    create type secret_scopes as enum (
         'user-login'
     );
 
-    CREATE TABLE secrets (
-        key           TEXT NOT NULL,
-        scope         secret_scopes NOT NULL,
-        value         TEXT NOT NULL,
-        PRIMARY KEY (key, scope)
+    create table secrets (
+        key           text not null,
+        scope         secret_scopes not null,
+        value         text not null,
+
+        primary key (key, scope),
+
+        constraint secrets_key_validation check (
+            length(trim(key)) != 0
+        ),
+
+        constraint secrets_value_validation check (
+            length(trim(value)) != 0
+        )
     );
 
-    CREATE TABLE lists (
-        id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-        owner_id    TEXT NOT NULL REFERENCES users(id),
-        name        TEXT NOT NULL,
-        created_at  TIMESTAMP DEFAULT NOW()
+    create table lists (
+        id          bigint generated always as identity primary key,
+        owner_id    text not null references users(id),
+        name        text not null,
+
+        constraint name_validation check (
+            length(trim(name)) != 0
+        )
     );
 
-    CREATE TABLE tasks (
-        id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-        list_id      BIGINT NOT NULL REFERENCES lists(id),
-        title        TEXT NOT NULL,
-        description  TEXT,
-        priority     INTEGER,
-        due_date     TIMESTAMP,
-        assignee     TEXT REFERENCES users(id),
-        labels       TEXT[]
+    create table tasks (
+        id           bigint generated always as identity primary key,
+        list_id      bigint not null references lists(id),
+        title        text not null,
+        description  text,
+        priority     integer,
+        due_date     timestamp,
+        assignee     text references users(id),
+        labels       text[],
+
+        constraint title_validation check (
+            length(trim(title)) != 0
+        ),
+
+        constraint priority_validation check (
+            priority is null or priority > 0
+        )
     );
 
-    CREATE TABLE list_access (
-        user_id            TEXT REFERENCES users(id),
-        list_id            BIGINT REFERENCES lists(id),
-        can_read_tasks     BOOLEAN NOT NULL DEFAULT FALSE,
-        can_update_tasks   BOOLEAN NOT NULL DEFAULT FALSE,
-        can_create_tasks   BOOLEAN NOT NULL DEFAULT FALSE,
-        can_delete_tasks   BOOLEAN NOT NULL DEFAULT FALSE,
-        PRIMARY KEY (user_id, list_id)
+    create table list_access (
+        user_id            text not null references users(id),
+        list_id            bigint not null references lists(id),
+        can_read_tasks     boolean not null default false,
+        can_update_tasks   boolean not null default false,
+        can_create_tasks   boolean not null default false,
+        can_delete_tasks   boolean not null default false,
+        primary key (user_id, list_id)
     );
-END;
-$$ LANGUAGE plpgsql;
-
-SELECT reinitialize_schema();
+end;
+$$ language plpgsql;
