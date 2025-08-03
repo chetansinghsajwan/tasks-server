@@ -8,8 +8,11 @@ begin
     drop table if exists users;
     drop type if exists secret_scopes;
 
+    create domain user_id_type as varchar(30);
+    create domain list_id_type as varchar(30);
+
     create table users (
-        id            text primary key,
+        id            user_id_type primary key,
         email         text unique not null,
         full_name     text not null,
         display_name  text,
@@ -55,37 +58,36 @@ begin
     );
 
     create table lists (
-        id          bigint generated always as identity primary key,
+        id          list_id_type primary key,
         owner_id    text not null references users(id),
-        name        text not null,
 
-        constraint name_validation check (
-            length(trim(name)) != 0
+        constraint lists_id_validation check (
+            length(trim(id)) != 0
         )
     );
 
     create table tasks (
         id           bigint generated always as identity primary key,
-        list_id      bigint not null references lists(id),
+        list_id      list_id_type not null references lists(id),
         title        text not null,
         description  text,
         priority     integer,
         due_date     timestamp,
-        assignee     text references users(id),
+        assignee     user_id_type references users(id),
         labels       text[],
 
-        constraint title_validation check (
+        constraint tasks_title_validation check (
             length(trim(title)) != 0
         ),
 
-        constraint priority_validation check (
+        constraint tasks_priority_validation check (
             priority is null or priority > 0
         )
     );
 
     create table list_access (
-        user_id            text not null references users(id),
-        list_id            bigint not null references lists(id),
+        user_id            user_id_type not null references users(id),
+        list_id            list_id_type not null references lists(id),
         can_read_tasks     boolean not null default false,
         can_update_tasks   boolean not null default false,
         can_create_tasks   boolean not null default false,
@@ -94,3 +96,5 @@ begin
     );
 end;
 $$ language plpgsql;
+
+select reinitialize_schema();
