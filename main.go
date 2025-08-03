@@ -22,7 +22,7 @@ func setupRouter() *gin.Engine {
 		r.DELETE("/tasks/:id", handlers.DeleteTask)
 
 		r.GET("/users/:id", handlers.GetUser)
-		r.PATCH("/users", handlers.UpdateUser)
+		r.PATCH("/users/:id", handlers.UpdateUser)
 		r.DELETE("/users/:id", handlers.DeleteUser)
 
 		r.POST("/lists", handlers.CreateList)

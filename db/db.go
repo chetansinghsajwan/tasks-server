@@ -23,7 +23,7 @@ func Init() {
 	var ctx = context.Background()
 
 	var err error
-	Pool, err := pgxpool.New(ctx, connString)
+	Pool, err = pgxpool.New(ctx, connString)
 	if err != nil {
 		panic("Failed to connect to the database: " + err.Error())
 	}
