@@ -8,9 +8,13 @@ begin
     drop table if exists users;
     drop type if exists secret_scopes;
     drop type if exists list_access_type;
+    drop type if exists user_id_type;
+    drop type if exists list_id_type;
+    drop type if exists list_name_type;
 
     create domain user_id_type as varchar(30);
     create domain list_id_type as varchar(30);
+    create domain list_name_type as varchar(60);
 
     create table users (
         id            user_id_type primary key,
@@ -59,10 +63,9 @@ begin
     );
 
     create table lists (
-        id          list_id_type not null,
-        owner_id    user_id_type not null references users(id),
-
-        primary key (owner_id, id),
+        id           bigint generated always as identity primary key,
+        name         list_name_type unique not null,
+        owner_id     user_id_type not null references users(id),
 
         constraint lists_id_validation check (
             length(trim(id)) != 0
@@ -90,10 +93,13 @@ begin
 
     create type list_access_type as enum (
 	    "owner",
-	    "read",
-	    "write",
-	    "update",
-	    "delete"
+	    "add-task",
+	    "read-task",
+	    "write-task",
+	    "remove-task",
+	    "add-access",
+	    "read-access",
+	    "remove-access"
     );
 
     create table list_access (

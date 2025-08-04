@@ -3,6 +3,7 @@ package main
 import (
 	"tasks/db"
 	"tasks/handlers"
+	"tasks/store/pg"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,7 @@ func setupRouter() *gin.Engine {
 	{
 		r.POST("/tasks", handlers.CreateTask)
 		r.GET("/tasks/:id", handlers.GetTask)
-		r.PATCH("/tasks", handlers.UpdateTask)
+		r.PATCH("/tasks/:id", handlers.UpdateTask)
 		r.DELETE("/tasks/:id", handlers.DeleteTask)
 
 		r.GET("/users/:id", handlers.GetUser)
@@ -27,7 +28,7 @@ func setupRouter() *gin.Engine {
 
 		r.POST("/lists", handlers.CreateList)
 		r.GET("/lists/:id", handlers.GetList)
-		r.PATCH("/lists", handlers.UpdateList)
+		r.PATCH("/lists/:id", handlers.UpdateList)
 		r.DELETE("/lists/:id", handlers.DeleteList)
 		r.GET("/lists/access/:listid/:userid", handlers.GetListAccess)
 		r.PUT("/lists/access/:listid/:userid", handlers.SetListAccess)
@@ -39,6 +40,10 @@ func setupRouter() *gin.Engine {
 func main() {
 
 	db.Init()
+
+	handlers.ST = pg.PostgresStore{
+		Pool: db.Pool,
+	}
 
 	r := setupRouter()
 	r.Run(":8080")

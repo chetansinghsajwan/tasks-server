@@ -11,11 +11,10 @@ type Store interface {
 	UpdateUser(ctx context.Context, id UserID, args UpdateUserParams) *StoreError
 	DeleteUser(ctx context.Context, id UserID) *StoreError
 
-	ParseListID(id string) (ListID, error)
 	CreateList(ctx context.Context, args CreateListParams) *StoreError
-	GetList(ctx context.Context, id ListID, owner_id UserID) (*List, *StoreError)
-	UpdateList(ctx context.Context, id ListID, owner_id UserID, args UpdateListParams) *StoreError
-	DeleteList(ctx context.Context, id ListID, owner_id UserID) *StoreError
+	GetList(ctx context.Context, id ListID) (*List, *StoreError)
+	UpdateList(ctx context.Context, id ListID, args UpdateListParams) *StoreError
+	DeleteList(ctx context.Context, id ListID) *StoreError
 
 	CreateSecret(ctx context.Context, args CreateSecretParams) *StoreError
 	GetSecret(ctx context.Context, key SecretKey) (*Secret, *StoreError)

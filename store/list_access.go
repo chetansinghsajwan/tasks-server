@@ -7,11 +7,14 @@ import (
 type ListAccessType string
 
 const (
-	ListAccessType_Owner  ListAccessType = "owner"
-	ListAccessType_Read   ListAccessType = "read"
-	ListAccessType_Write  ListAccessType = "write"
-	ListAccessType_Update ListAccessType = "update"
-	ListAccessType_Delete ListAccessType = "delete"
+	ListAccessType_Owner        ListAccessType = "owner"
+	ListAccessType_AddTask      ListAccessType = "add-task"
+	ListAccessType_ReadTask     ListAccessType = "read-task"
+	ListAccessType_WriteTask    ListAccessType = "write-task"
+	ListAccessType_RemoveTask   ListAccessType = "remove-task"
+	ListAccessType_AddAccess    ListAccessType = "add-access"
+	ListAccessType_ReadAccess   ListAccessType = "read-access"
+	ListAccessType_RemoveAccess ListAccessType = "remove-access"
 )
 
 type ListAccess struct {
