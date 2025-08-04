@@ -9,11 +9,9 @@ begin
     drop type if exists secret_scopes;
     drop type if exists list_access_type;
     drop type if exists user_id_type;
-    drop type if exists list_id_type;
     drop type if exists list_name_type;
 
     create domain user_id_type as varchar(30);
-    create domain list_id_type as varchar(30);
     create domain list_name_type as varchar(60);
 
     create table users (
@@ -67,14 +65,14 @@ begin
         name         list_name_type unique not null,
         owner_id     user_id_type not null references users(id),
 
-        constraint lists_id_validation check (
-            length(trim(id)) != 0
+        constraint lists_name_validation check (
+            length(trim(name)) != 0
         )
     );
 
     create table tasks (
         id           bigint generated always as identity primary key,
-        list_id      list_id_type not null references lists(id),
+        list_id      bigint not null references lists(id),
         title        text not null,
         description  text,
         priority     integer,
@@ -92,24 +90,22 @@ begin
     );
 
     create type list_access_type as enum (
-	    "owner",
-	    "add-task",
-	    "read-task",
-	    "write-task",
-	    "remove-task",
-	    "add-access",
-	    "read-access",
-	    "remove-access"
+	    'owner',
+	    'add-task',
+	    'read-task',
+	    'write-task',
+	    'remove-task',
+	    'add-access',
+	    'read-access',
+	    'remove-access'
     );
 
     create table list_access (
         user_id            user_id_type not null references users(id),
-        list_id            list_id_type not null references lists(id),
+        list_id            bigint not null references lists(id),
         access             list_access_type not null,
 
         primary key (user_id, list_id, access)
     );
 end;
 $$ language plpgsql;
-
-select reinitialize_schema();
