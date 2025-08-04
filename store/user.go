@@ -30,9 +30,9 @@ type UpdateUserParams struct {
 
 type UserStore interface {
 	ParseUserID(id string) (UserID, error)
+	CreateUser(ctx context.Context, args CreateUserParams) *StoreError
 	GetUser(ctx context.Context, id UserID) (*User, *StoreError)
 	GetUsersWhere(ctx context.Context, where string, count uint, from uint) ([]User, *StoreError)
-	CreateUser(ctx context.Context, args CreateUserParams) *StoreError
 	UpdateUser(ctx context.Context, id UserID, args UpdateUserParams) *StoreError
 	DeleteUser(ctx context.Context, id UserID) *StoreError
 }

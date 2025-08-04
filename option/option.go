@@ -41,7 +41,7 @@ func (o Option[_]) IsNone() bool {
 
 func (o Option[T]) Get() (T, bool) { return o.value, o.isSome }
 
-func (o Option[T]) Unwrap() T {
+func (o Option[T]) MustGet() T {
 	if !o.isSome {
 		panic("called Unwrap on None")
 	}

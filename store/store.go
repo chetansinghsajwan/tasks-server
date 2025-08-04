@@ -31,9 +31,20 @@ const (
 
 	// List related errors
 	ErrListNotFoundCode
+	ErrListIDNullCode
+	ErrListIDAlreadyExistsCode
+	ErrListIDFormatCode
+
+	// List Accesss related errors
+	ErrListAccessNotFound
+	ErrListAccessAlreadyExists
+	ErrListAccessOwnerAlreadyExists
 
 	// Task related errors
 	ErrTaskNotFoundCode
+
+	// Secret related errors
+	ErrSecretNotFound
 )
 
 type StoreError struct {
