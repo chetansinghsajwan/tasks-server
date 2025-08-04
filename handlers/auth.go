@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"tasks/db"
-	"tasks/sqlc"
+	"tasks/store"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -42,8 +41,9 @@ func GenerateToken(userId string) (string, error) {
 
 func AuthenticateMiddleware(c *gin.Context) {
 
-	var tokenStr, err = c.Cookie("access-token")
-	if err != nil {
+	var err error
+	var tokenStr string
+	if tokenStr, err = c.Cookie("access-token"); err != nil {
 
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": fmt.Sprintf("no access token provided. Error: %s", err.Error()),
@@ -51,7 +51,9 @@ func AuthenticateMiddleware(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+	var token *jwt.Token
+	token, err = jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+
 		// Make sure signing method is HMAC
 		if _, ok := token.Method.(*jwt.SigningMethodRSAPSS); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
@@ -69,8 +71,8 @@ func AuthenticateMiddleware(c *gin.Context) {
 	}
 
 	// Extract username if needed
-	userId, err := token.Claims.GetSubject()
-	if err != nil {
+	var userIdStr string
+	if userIdStr, err = token.Claims.GetSubject(); err != nil {
 
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": err.Error(),
@@ -78,7 +80,7 @@ func AuthenticateMiddleware(c *gin.Context) {
 		return
 	}
 
-	if userId == "" {
+	if userIdStr == "" {
 
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "userid must not be empty",
@@ -86,7 +88,7 @@ func AuthenticateMiddleware(c *gin.Context) {
 		return
 	}
 
-	c.Set("userid", userId)
+	c.Set("userid", userIdStr)
 }
 
 type LoginRequest struct {
@@ -102,7 +104,8 @@ func Login(c *gin.Context) {
 	defer cancel()
 
 	var body LoginRequest
-	if err := c.BindJSON(&body); err != nil {
+	var err error
+	if err = c.BindJSON(&body); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -110,34 +113,23 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	var quries, err = db.Begin(ctx)
-	if err != nil {
-
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	defer quries.Tx.Rollback(ctx)
-
-	hashedPassword, err := quries.Queries.GetSecret(ctx, sqlc.GetSecretParams{
-		Key:   body.UserID,
+	var serr *store.StoreError
+	var secret *store.Secret
+	secret, serr = ST.GetSecret(ctx, store.SecretKey{
+		ID:    body.UserID,
 		Scope: "user-login",
 	})
 
-	if err != nil {
+	if serr != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": serr.Msg,
 		})
 		return
 	}
 
-	quries.Tx.Commit(ctx)
-
 	err = bcrypt.CompareHashAndPassword(
-		[]byte(hashedPassword), []byte(body.Password))
+		[]byte(secret.Pass), []byte(body.Password))
 
 	if err != nil {
 
@@ -147,8 +139,8 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := GenerateToken(body.UserID)
-	if err != nil {
+	var token string
+	if token, err = GenerateToken(body.UserID); err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

@@ -2,17 +2,12 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
-	"errors"
-	"fmt"
 	"net/http"
-	"tasks/db"
-	"tasks/sqlc"
-	"tasks/utils"
+	"tasks/option"
+	"tasks/store"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgconn"
 )
 
 const (
@@ -24,6 +19,15 @@ const (
 	SetListAccessRequestTimeout = time.Second * 5
 )
 
+type CreateListRequest struct {
+	ID   store.ListID `json:"id"`
+	Name string       `json:"name"`
+}
+
+type UpdateListRequest struct {
+	Name option.Option[string] `json:"name"`
+}
+
 func CreateList(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(
@@ -31,43 +35,31 @@ func CreateList(c *gin.Context) {
 
 	defer cancel()
 
-	var list sqlc.CreateListParams
-	var err = c.BindJSON(&list)
-	if err != nil {
+	// Parse request body
+	var body CreateListRequest
+	var err error
+	if err = c.BindJSON(&body); err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-
 		return
 	}
 
-	var listId int64
-	listId, err = db.Queries.CreateList(ctx, list)
+	// Perform creation
+	var serr *store.StoreError = ST.CreateList(ctx, store.CreateListParams{
+		Name: body.Name,
+	})
 
-	if err != nil {
-
-		var pgerr *pgconn.PgError
-		if errors.As(err, &pgerr) {
-
-			if pgerr.Code == "25303" && pgerr.ColumnName == "" {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"error": pgerr.Detail,
-				})
-
-				return
-			}
-		}
+	if serr != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": serr.Msg,
 		})
-
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"listId": listId,
-	})
+	c.Status(http.StatusCreated)
 }
 
 func GetList(c *gin.Context) {
@@ -77,39 +69,31 @@ func GetList(c *gin.Context) {
 
 	defer cancel()
 
-	var listId, err = utils.ParseInt64(c.Param("id"))
+	// Parse list id
+	var listId, err = store.ParseListID(c.Param("id"))
 	if err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	var list sqlc.List
-	list, err = db.Queries.GetList(ctx, listId)
+	// Get list
+	var list *store.List
+	var serr *store.StoreError
+	list, serr = ST.GetList(ctx, listId)
 
-	if err != nil {
-
-		if errors.Unwrap(err) == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": fmt.Sprintf("List with id '%d' doesn't exist.", listId),
-			})
-
-			return
-		}
+	if serr != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal server error",
+			"error": serr.Msg,
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"list": gin.H{
-			"id":       list.ID,
-			"owner_id": list.OwnerID,
-			"name":     list.Name,
-		},
+		"list": list,
 	})
 }
 
@@ -120,29 +104,42 @@ func UpdateList(c *gin.Context) {
 
 	defer cancel()
 
-	var listUpdate *sqlc.UpdateListParams
+	// Parse list id
+	var listId store.ListID
 	var err error
-	err = c.BindJSON(&listUpdate)
-	if err != nil {
+	if listId, err = store.ParseListID(c.Param("id")); err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-
 		return
 	}
 
-	err = db.Queries.UpdateList(ctx, *listUpdate)
+	// Parse request body
+	var body *UpdateListRequest
+	err = c.BindJSON(&body)
 	if err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "List updated successfully",
+	// Update the list
+	var serr *store.StoreError = ST.UpdateList(ctx, listId, store.UpdateListParams{
+		Name: body.Name,
 	})
+
+	if serr != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": serr.Msg,
+		})
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func DeleteList(c *gin.Context) {
@@ -152,44 +149,10 @@ func DeleteList(c *gin.Context) {
 
 	defer cancel()
 
-	var listId, err = utils.ParseInt64(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	err = db.Queries.DeleteList(ctx, listId)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, nil)
-}
-
-func GetListAccess(c *gin.Context) {
-
-	var ctx, cancel = context.WithTimeout(
-		context.Background(), GetListAccessRequestTimeout)
-
-	defer cancel()
-
-	var userid = c.Param("userid")
-	if userid == "" {
-
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "userid must not be empty.",
-		})
-		return
-	}
-
-	var listid, err = utils.ParseInt64(c.Param("listid"))
-	if err != nil {
+	// Parse list id
+	var listId store.ListID
+	var err error
+	if listId, err = store.ParseListID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -197,74 +160,12 @@ func GetListAccess(c *gin.Context) {
 		return
 	}
 
-	var params = sqlc.GetListAccessParams{
-		UserID: userid,
-		ListID: listid,
-	}
-
-	var access sqlc.ListAccess
-	access, err = db.Queries.GetListAccess(ctx, params)
-	if err != nil {
-
-		if errors.Unwrap(err) == sql.ErrNoRows {
-
-			access = sqlc.ListAccess{
-				UserID:         userid,
-				ListID:         listid,
-				CanReadTasks:   false,
-				CanUpdateTasks: false,
-				CanCreateTasks: false,
-				CanDeleteTasks: false,
-			}
-		} else {
-
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"access": access,
-	})
-}
-
-func SetListAccess(c *gin.Context) {
-
-	var ctx, cancel = context.WithTimeout(
-		context.Background(), GetListAccessRequestTimeout)
-
-	defer cancel()
-
-	var userid = c.Param("userid")
-	if userid == "" {
-
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "userid must not be empty.",
-		})
-		return
-	}
-
-	var listid, err = utils.ParseInt64(c.Param("listid"))
-	if err != nil {
-
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	var params = sqlc.SetListAccessParams{
-		UserID: userid,
-		ListID: listid,
-	}
-
-	err = db.Queries.SetListAccess(ctx, params)
-	if err != nil {
+	// Perform deletion
+	var serr *store.StoreError = ST.DeleteList(ctx, listId)
+	if serr != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": serr.Msg,
 		})
 		return
 	}

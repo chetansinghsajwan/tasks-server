@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func (st PostgresStore) AddAccess(ctx context.Context, args store.AddListAccessParams) *store.StoreError {
+func (st PostgresStore) AddListAccess(ctx context.Context, args store.AddListAccessParams) *store.StoreError {
 
 	// There are no accesses to add
 	if len(args.Access) == 0 {
@@ -58,7 +58,7 @@ func (st PostgresStore) AddAccess(ctx context.Context, args store.AddListAccessP
 	return nil
 }
 
-func (st PostgresStore) GetAccess(ctx context.Context, args store.GetListAccessParams) (*store.ListAccess, *store.StoreError) {
+func (st PostgresStore) GetListAccess(ctx context.Context, args store.GetListAccessParams) (*store.ListAccess, *store.StoreError) {
 
 	const query = `
 		select access
@@ -115,7 +115,7 @@ func (st PostgresStore) GetAccess(ctx context.Context, args store.GetListAccessP
 	}, nil
 }
 
-func (st PostgresStore) RemoveAccesses(ctx context.Context, args store.RemoveListAccessParams) *store.StoreError {
+func (st PostgresStore) RemoveListAccess(ctx context.Context, args store.RemoveListAccessParams) *store.StoreError {
 
 	// There is nothing to remove
 	if args.UserID.IsNone() && args.ListID.IsNone() && args.Access.IsNone() {

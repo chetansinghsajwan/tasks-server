@@ -10,7 +10,7 @@ import (
 
 func setupRouter() *gin.Engine {
 
-	r := gin.Default()
+	var r = gin.Default()
 
 	r.POST("/auth/login", handlers.Login)
 	r.POST("/api/users", handlers.CreateUser)
@@ -30,8 +30,10 @@ func setupRouter() *gin.Engine {
 		r.GET("/lists/:id", handlers.GetList)
 		r.PATCH("/lists/:id", handlers.UpdateList)
 		r.DELETE("/lists/:id", handlers.DeleteList)
-		r.GET("/lists/access/:listid/:userid", handlers.GetListAccess)
-		r.PUT("/lists/access/:listid/:userid", handlers.SetListAccess)
+
+		r.POST("/lists/access/:id", handlers.AddListAccess)
+		r.GET("/lists/access/:id", handlers.GetListAccess)
+		r.DELETE("/lists/access/:id", handlers.RemoveListAccess)
 	}
 
 	return r
@@ -45,6 +47,6 @@ func main() {
 		Pool: db.Pool,
 	}
 
-	r := setupRouter()
+	var r = setupRouter()
 	r.Run(":8080")
 }

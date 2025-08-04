@@ -2,17 +2,12 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
-	"errors"
-	"fmt"
 	"net/http"
-	"tasks/db"
-	"tasks/sqlc"
-	"tasks/utils"
+	"tasks/option"
+	"tasks/store"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgconn"
 )
 
 const (
@@ -22,6 +17,26 @@ const (
 	DeleteTaskRequestTimeout = time.Second * 5
 )
 
+type CreateTaskRequest struct {
+	ListID      store.ListID                `json:"list_id"`
+	Title       string                      `json:"title"`
+	Description option.Option[string]       `json:"description"`
+	Priority    option.Option[uint32]       `json:"priority"`
+	DueDate     option.Option[time.Time]    `json:"due_date"`
+	Assignee    option.Option[store.UserID] `json:"assignee"`
+	Labels      []string                    `json:"labels"`
+}
+
+type UpdateTaskRequest struct {
+	ListID      option.Option[*store.ListID] `json:"list_id"`
+	Title       option.Option[*string]       `json:"title"`
+	Description option.Option[*string]       `json:"description"`
+	Priority    option.Option[*uint32]       `json:"priority"`
+	DueDate     option.Option[*time.Time]    `json:"due_date"`
+	Assignee    option.Option[*store.UserID] `json:"assignee"`
+	Labels      option.Option[[]string]      `json:"labels"`
+}
+
 func CreateTask(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(
@@ -29,8 +44,8 @@ func CreateTask(c *gin.Context) {
 
 	defer cancel()
 
-	var task sqlc.CreateTaskParams
-	var err = c.BindJSON(&task)
+	var body CreateTaskRequest
+	var err = c.BindJSON(&body)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -39,27 +54,23 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	var taskId int64
-	taskId, err = db.Queries.CreateTask(ctx, task)
+	var taskId store.TaskID
+	var serr *store.StoreError
+	taskId, serr = ST.CreateTask(ctx, store.CreateTaskParams{
+		ListID:      body.ListID,
+		Title:       body.Title,
+		Description: body.Description,
+		Priority:    body.Priority,
+		DueDate:     body.DueDate,
+		Assignee:    body.Assignee,
+		Labels:      body.Labels,
+	})
 
-	if err != nil {
-
-		var pgerr *pgconn.PgError
-		if errors.As(err, &pgerr) {
-
-			if pgerr.Code == "25303" && pgerr.ColumnName == "" {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"error": pgerr.Detail,
-				})
-
-				return
-			}
-		}
+	if serr != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": serr.Msg,
 		})
-
 		return
 	}
 
@@ -75,43 +86,29 @@ func GetTask(c *gin.Context) {
 
 	defer cancel()
 
-	var taskId, err = utils.ParseInt64(c.Param("id"))
+	var taskId, err = store.ParseTaskID(c.Param("id"))
 	if err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	var task sqlc.Task
-	task, err = db.Queries.GetTask(ctx, taskId)
+	var task *store.Task
+	var serr *store.StoreError
+	task, serr = ST.GetTask(ctx, taskId)
 
-	if err != nil {
-
-		if errors.Unwrap(err) == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": fmt.Sprintf("Task with id '%d' doesn't exist.", taskId),
-			})
-
-			return
-		}
+	if serr != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal server error",
+			"error": serr.Msg,
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"task": gin.H{
-			"id":          task.ID,
-			"title":       task.Title,
-			"description": task.Description,
-			"priority":    task.Priority,
-			"dueDate":     task.DueDate,
-			"assignee":    task.Assignee,
-			"labels":      task.Labels,
-		},
+		"task": *task,
 	})
 }
 
@@ -122,10 +119,18 @@ func UpdateTask(c *gin.Context) {
 
 	defer cancel()
 
-	var taskUpdate *sqlc.UpdateTaskParams
+	var taskId store.TaskID
 	var err error
-	err = c.BindJSON(&taskUpdate)
-	if err != nil {
+	if taskId, err = store.ParseTaskID(c.Param("id")); err != nil {
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var body UpdateTaskRequest
+	if err = c.BindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -133,12 +138,21 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 
-	err = db.Queries.UpdateTask(ctx, *taskUpdate)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+	var serr *store.StoreError = ST.UpdateTask(ctx, taskId, store.UpdateTaskParams{
+		ListID:      body.ListID,
+		Title:       body.Title,
+		Description: body.Description,
+		Priority:    body.Priority,
+		DueDate:     body.DueDate,
+		Assignee:    body.Assignee,
+		Labels:      body.Labels,
+	})
 
+	if serr != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": serr.Msg,
+		})
 		return
 	}
 
@@ -154,22 +168,25 @@ func DeleteTask(c *gin.Context) {
 
 	defer cancel()
 
-	var taskId, err = utils.ParseInt64(c.Param("id"))
-	if err != nil {
+	var taskId store.TaskID
+	var err error
+	if taskId, err = store.ParseTaskID(c.Param("id")); err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	err = db.Queries.DeleteTask(ctx, taskId)
+	var serr *store.StoreError = ST.DeleteTask(ctx, taskId)
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+	if serr != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": serr.Msg,
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.Status(http.StatusOK)
 }

@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"tasks/db"
 	"tasks/option"
 	"tasks/store"
-	"tasks/store/pg"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +19,8 @@ const (
 	DeleteUserRequestTimeout = time.Second * 5000000000
 	BcryptUserEncryptionCost = bcrypt.DefaultCost
 )
+
+var ST store.Store
 
 type CreateUserBody struct {
 	ID          string  `json:"id"`
@@ -47,10 +47,6 @@ func CreateUser(c *gin.Context) {
 
 	defer cancel()
 
-	var st store.Store = pg.PostgresStore{
-		Pool: db.Pool,
-	}
-
 	// Parse request body
 	var body CreateUserBody
 	var err error
@@ -63,7 +59,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	var serr *store.StoreError
-	serr = st.CreateUser(ctx, store.CreateUserParams{
+	serr = ST.CreateUser(ctx, store.CreateUserParams{
 		ID:          body.ID,
 		Email:       body.Email,
 		FullName:    body.FullName,
@@ -130,10 +126,6 @@ func GetUser(c *gin.Context) {
 
 	defer cancel()
 
-	var st store.Store = pg.PostgresStore{
-		Pool: db.Pool,
-	}
-
 	var err error
 	var userId store.UserID
 	if userId, err = store.ParseUserID(c.Param("id")); err != nil {
@@ -146,7 +138,7 @@ func GetUser(c *gin.Context) {
 
 	var user *store.User
 	var serr *store.StoreError
-	if user, serr = st.GetUser(ctx, userId); serr != nil {
+	if user, serr = ST.GetUser(ctx, userId); serr != nil {
 
 		switch serr.Code {
 		case store.ErrUserNotFoundCode:
@@ -176,10 +168,6 @@ func UpdateUser(c *gin.Context) {
 
 	defer cancel()
 
-	var st store.Store = pg.PostgresStore{
-		Pool: db.Pool,
-	}
-
 	var err error
 	var userId store.UserID
 	if userId, err = store.ParseUserID(c.Param("id")); err != nil {
@@ -207,7 +195,7 @@ func UpdateUser(c *gin.Context) {
 		FullName:    option.Some(body.FullName),
 		DisplayName: option.Some(body.DisplayName),
 	}
-	if serr = st.UpdateUser(ctx, userId, args); serr != nil {
+	if serr = ST.UpdateUser(ctx, userId, args); serr != nil {
 
 		switch serr.Code {
 		case store.ErrUserNotFoundCode,
@@ -242,10 +230,6 @@ func DeleteUser(c *gin.Context) {
 	)
 
 	defer cancel()
-
-	var st store.Store = pg.PostgresStore{
-		Pool: db.Pool,
-	}
 
 	var userId store.UserID
 	var err error
