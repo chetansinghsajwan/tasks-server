@@ -42,7 +42,7 @@ func TestCreateUser(t *testing.T) {
 		DisplayName: option.Some("First"),
 	})
 
-	if serr.Code != store.ErrUserIDFormatCode {
+	if serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormat error, got: %v", serr)
 	}
 
@@ -54,7 +54,7 @@ func TestCreateUser(t *testing.T) {
 		DisplayName: option.Some("First"),
 	})
 
-	if serr.Code != store.ErrUserIDFormatCode {
+	if serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormat error, got: %v", serr)
 	}
 
@@ -66,7 +66,7 @@ func TestCreateUser(t *testing.T) {
 		DisplayName: option.Some("First"),
 	})
 
-	if serr.Code != store.ErrUserIDFormatCode {
+	if serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormat error, got: %v", serr)
 	}
 
@@ -78,7 +78,7 @@ func TestCreateUser(t *testing.T) {
 		DisplayName: option.Some("First"),
 	})
 
-	if serr.Code != store.ErrUserIDFormatCode {
+	if serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormat error, got: %v", serr)
 	}
 
@@ -90,7 +90,7 @@ func TestCreateUser(t *testing.T) {
 		DisplayName: option.Some("First"),
 	})
 
-	if serr.Code != store.ErrUserIDFormatCode {
+	if serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormat error, got: %v", serr)
 	}
 

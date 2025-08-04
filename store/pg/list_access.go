@@ -40,7 +40,7 @@ func (st PostgresStore) AddListAccess(ctx context.Context, args store.AddListAcc
 	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -49,7 +49,7 @@ func (st PostgresStore) AddListAccess(ctx context.Context, args store.AddListAcc
 	if !cmd.Insert() {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -73,7 +73,7 @@ func (st PostgresStore) GetListAccess(ctx context.Context, args store.GetListAcc
 	if rows, err = st.Pool.Query(ctx, query, args.UserID, args.ListID); err != nil {
 
 		return nil, &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -89,7 +89,7 @@ func (st PostgresStore) GetListAccess(ctx context.Context, args store.GetListAcc
 		if err = rows.Scan(&access); err != nil {
 
 			return nil, &store.StoreError{
-				Code:         store.ErrUnknown,
+				Code:         store.ErrorCode_Unknown,
 				Msg:          "unknown error",
 				WrappedError: err,
 			}
@@ -102,7 +102,7 @@ func (st PostgresStore) GetListAccess(ctx context.Context, args store.GetListAcc
 	if err = rows.Err(); err != nil {
 
 		return nil, &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -158,7 +158,7 @@ func (st PostgresStore) RemoveListAccess(ctx context.Context, args store.RemoveL
 	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -167,7 +167,7 @@ func (st PostgresStore) RemoveListAccess(ctx context.Context, args store.RemoveL
 	if !cmd.Delete() {
 
 		return &store.StoreError{
-			Code: store.ErrUnknown,
+			Code: store.ErrorCode_Unknown,
 			Msg:  "unknown error",
 		}
 	}

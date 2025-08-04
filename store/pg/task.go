@@ -33,7 +33,7 @@ func (st PostgresStore) CreateTask(ctx context.Context,
 		}
 
 		return store.NullTaskID(), &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -61,14 +61,14 @@ func (st PostgresStore) GetTask(ctx context.Context,
 		if errors.Unwrap(err) == sql.ErrNoRows {
 
 			return nil, &store.StoreError{
-				Code:         store.ErrTaskNotFoundCode,
+				Code:         store.ErrorCode_TaskNotFoundCode,
 				Msg:          fmt.Sprintf("task with id '%v' not found", id),
 				WrappedError: err,
 			}
 		}
 
 		return nil, &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -154,7 +154,7 @@ func (st PostgresStore) UpdateTask(ctx context.Context, id store.TaskID, args st
 	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -163,7 +163,7 @@ func (st PostgresStore) UpdateTask(ctx context.Context, id store.TaskID, args st
 	if !cmd.Update() {
 
 		return &store.StoreError{
-			Code:         store.ErrTaskNotFoundCode,
+			Code:         store.ErrorCode_TaskNotFoundCode,
 			Msg:          fmt.Sprintf("task with id '%v' not found", id),
 			WrappedError: err,
 		}
@@ -185,7 +185,7 @@ func (st PostgresStore) DeleteTask(ctx context.Context,
 	if cmd, err = st.Pool.Exec(ctx, query, id); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -194,7 +194,7 @@ func (st PostgresStore) DeleteTask(ctx context.Context,
 	if !cmd.Delete() {
 
 		return &store.StoreError{
-			Code:         store.ErrTaskNotFoundCode,
+			Code:         store.ErrorCode_TaskNotFoundCode,
 			Msg:          fmt.Sprintf("task with id '%v' not found", id),
 			WrappedError: err,
 		}

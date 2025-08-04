@@ -36,14 +36,14 @@ func (st PostgresStore) GetUser(ctx context.Context, id store.UserID) (*store.Us
 		if errors.Unwrap(err) == sql.ErrNoRows {
 
 			return nil, &store.StoreError{
-				Code:         store.ErrUserNotFoundCode,
+				Code:         store.ErrorCode_UserNotFound,
 				Msg:          fmt.Sprintf("user with id '%s' not found", id),
 				WrappedError: err,
 			}
 		}
 
 		return nil, &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -69,7 +69,7 @@ func (st PostgresStore) GetUsersWhere(ctx context.Context, where string, count u
 	if err != nil {
 
 		return nil, &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -82,7 +82,7 @@ func (st PostgresStore) GetUsersWhere(ctx context.Context, where string, count u
 		if err = rows.Scan(&user.ID, &user.Email, &user.FullName, &user.DisplayName); err != nil {
 
 			return nil, &store.StoreError{
-				Code:         store.ErrUnknown,
+				Code:         store.ErrorCode_Unknown,
 				Msg:          "unknown error",
 				WrappedError: err,
 			}
@@ -94,7 +94,7 @@ func (st PostgresStore) GetUsersWhere(ctx context.Context, where string, count u
 	if err != nil {
 
 		return nil, &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -122,7 +122,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 				pgerr.TableName == "users" && pgerr.ColumnName == "id" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserIDNullCode,
+					Code:         store.ErrorCode_UserIDNull,
 					Msg:          "user id cannot be null",
 					WrappedError: err,
 				}
@@ -131,7 +131,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_id_validation" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserIDFormatCode,
+					Code:         store.ErrorCode_UserIDFormat,
 					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", args.ID, userIdFormatHint),
 					WrappedError: err,
 				}
@@ -140,7 +140,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.UniqueViolation && pgerr.ConstraintName == "users_pkey" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserIDAlreadyExistsCode,
+					Code:         store.ErrorCode_UserIDAlreadyExists,
 					Msg:          fmt.Sprintf("user id '%s' already exists", args.ID),
 					WrappedError: err,
 				}
@@ -150,7 +150,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 				pgerr.TableName == "users" && pgerr.ColumnName == "email" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserEmailNullCode,
+					Code:         store.ErrorCode_UserEmailNull,
 					Msg:          "user email cannot be null",
 					WrappedError: err,
 				}
@@ -159,7 +159,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_email_validation" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserEmailFormatCode,
+					Code:         store.ErrorCode_UserEmailFormat,
 					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", args.Email, userEmailFormatHint),
 					WrappedError: err,
 				}
@@ -168,7 +168,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.UniqueViolation && pgerr.ConstraintName == "users_email_key" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserEmailAlreadyExistsCode,
+					Code:         store.ErrorCode_UserEmailAlreadyExists,
 					Msg:          fmt.Sprintf("user email '%s' already exis", args.Email),
 					WrappedError: err,
 				}
@@ -177,7 +177,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_full_name_validation" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserFullNameFormatCode,
+					Code:         store.ErrorCode_UserFullNameFormat,
 					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", args.FullName, userFullNameFormatHint),
 					WrappedError: err,
 				}
@@ -186,7 +186,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_display_name_validation" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserDisplayNameFormatCode,
+					Code:         store.ErrorCode_UserDisplayNameFormat,
 					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.FullName, userDisplayNameFormatHint),
 					WrappedError: err,
 				}
@@ -194,7 +194,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 		}
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -203,7 +203,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 	if !cmd.Insert() {
 
 		return &store.StoreError{
-			Code: store.ErrUnknown,
+			Code: store.ErrorCode_Unknown,
 			Msg:  "user insertion failed",
 		}
 	}
@@ -260,7 +260,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_id_validation" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserIDFormatCode,
+					Code:         store.ErrorCode_UserIDFormat,
 					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", args.ID, userIdFormatHint),
 					WrappedError: err,
 				}
@@ -269,7 +269,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 			if pgerr.Code == pgerrcode.UniqueViolation && pgerr.ConstraintName == "users_pkey" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserIDAlreadyExistsCode,
+					Code:         store.ErrorCode_UserIDAlreadyExists,
 					Msg:          fmt.Sprintf("user id '%s' already exists", args.ID),
 					WrappedError: err,
 				}
@@ -279,7 +279,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 				pgerr.TableName == "users" && pgerr.ColumnName == "email" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserEmailNullCode,
+					Code:         store.ErrorCode_UserEmailNull,
 					Msg:          "user email cannot be null",
 					WrappedError: err,
 				}
@@ -288,7 +288,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_email_validation" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserEmailFormatCode,
+					Code:         store.ErrorCode_UserEmailFormat,
 					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", args.Email, userEmailFormatHint),
 					WrappedError: err,
 				}
@@ -297,7 +297,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 			if pgerr.Code == pgerrcode.UniqueViolation && pgerr.ConstraintName == "users_email_key" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserEmailAlreadyExistsCode,
+					Code:         store.ErrorCode_UserEmailAlreadyExists,
 					Msg:          fmt.Sprintf("user email '%s' already exis", args.Email),
 					WrappedError: err,
 				}
@@ -306,7 +306,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_full_name_validation" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserFullNameFormatCode,
+					Code:         store.ErrorCode_UserFullNameFormat,
 					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", args.FullName, userFullNameFormatHint),
 					WrappedError: err,
 				}
@@ -315,7 +315,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_display_name_validation" {
 
 				return &store.StoreError{
-					Code:         store.ErrUserDisplayNameFormatCode,
+					Code:         store.ErrorCode_UserDisplayNameFormat,
 					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.FullName, userDisplayNameFormatHint),
 					WrappedError: err,
 				}
@@ -323,7 +323,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 		}
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -332,7 +332,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 	if !cmd.Update() {
 
 		return &store.StoreError{
-			Code: store.ErrUserNotFoundCode,
+			Code: store.ErrorCode_UserNotFound,
 			Msg:  fmt.Sprintf("user '%s' not found", id),
 		}
 	}
@@ -354,7 +354,7 @@ func (st PostgresStore) DeleteUser(ctx context.Context, id store.UserID) *store.
 	if err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -363,7 +363,7 @@ func (st PostgresStore) DeleteUser(ctx context.Context, id store.UserID) *store.
 	if !cmd.Delete() {
 
 		return &store.StoreError{
-			Code: store.ErrUserNotFoundCode,
+			Code: store.ErrorCode_UserNotFound,
 			Msg:  fmt.Sprintf("user '%s' not found", id),
 		}
 	}

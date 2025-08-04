@@ -23,7 +23,7 @@ func (st PostgresStore) CreateSecret(ctx context.Context, args store.CreateSecre
 	if cmd, err = st.Pool.Exec(ctx, query, args.ID, args.Scope, args.Pass); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -32,7 +32,7 @@ func (st PostgresStore) CreateSecret(ctx context.Context, args store.CreateSecre
 	if !cmd.Insert() {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -58,14 +58,14 @@ func (st PostgresStore) GetSecret(ctx context.Context, key store.SecretKey) (*st
 		if errors.Unwrap(err) == sql.ErrNoRows {
 
 			return nil, &store.StoreError{
-				Code:         store.ErrSecretNotFound,
+				Code:         store.ErrorCode_SecretNotFound,
 				Msg:          fmt.Sprintf("secret with id '%s', scope '%s' not found", key.ID, key.Scope),
 				WrappedError: err,
 			}
 		}
 
 		return nil, &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -124,7 +124,7 @@ func (st PostgresStore) UpdateSecret(ctx context.Context, key store.SecretKey, a
 	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -133,7 +133,7 @@ func (st PostgresStore) UpdateSecret(ctx context.Context, key store.SecretKey, a
 	if !cmd.Update() {
 
 		return &store.StoreError{
-			Code:         store.ErrSecretNotFound,
+			Code:         store.ErrorCode_SecretNotFound,
 			Msg:          fmt.Sprintf("secret with id '%s', scope '%s' not found", key.ID, key.Scope),
 			WrappedError: err,
 		}
@@ -154,7 +154,7 @@ func (st PostgresStore) DeleteSecret(ctx context.Context, key store.SecretKey) *
 	if cmd, err = st.Pool.Exec(ctx, query, key.ID, key.Scope); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrUnknown,
+			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -163,7 +163,7 @@ func (st PostgresStore) DeleteSecret(ctx context.Context, key store.SecretKey) *
 	if !cmd.Delete() {
 
 		return &store.StoreError{
-			Code:         store.ErrSecretNotFound,
+			Code:         store.ErrorCode_SecretNotFound,
 			Msg:          fmt.Sprintf("secret with id '%s', key '%s' not found", key.ID, key.Scope),
 			WrappedError: err,
 		}

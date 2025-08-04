@@ -6,44 +6,44 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-type StoreErrorCode uint32
+type ErrorCode uint32
 
 const (
-	ErrUnknown StoreErrorCode = iota
-	ErrTxCreateCode
-	ErrTxCommitCode
+	ErrorCode_Unknown ErrorCode = iota
+	ErrorCode_TxCreate
+	ErrorCode_TxCommit
 
 	// User related errors
-	ErrUserNotFoundCode
-	ErrUserIDNullCode
-	ErrUserIDAlreadyExistsCode
-	ErrUserIDFormatCode
-	ErrUserEmailNullCode
-	ErrUserEmailAlreadyExistsCode
-	ErrUserEmailFormatCode
-	ErrUserFullNameFormatCode
-	ErrUserDisplayNameFormatCode
+	ErrorCode_UserNotFound
+	ErrorCode_UserIDNull
+	ErrorCode_UserIDAlreadyExists
+	ErrorCode_UserIDFormat
+	ErrorCode_UserEmailNull
+	ErrorCode_UserEmailAlreadyExists
+	ErrorCode_UserEmailFormat
+	ErrorCode_UserFullNameFormat
+	ErrorCode_UserDisplayNameFormat
 
 	// List related errors
-	ErrListNotFoundCode
-	ErrListIDNullCode
-	ErrListIDAlreadyExistsCode
-	ErrListIDFormatCode
+	ErrorCode_ListNotFound
+	ErrorCode_ListIDNull
+	ErrorCode_ListIDAlreadyExists
+	ErrorCode_ListIDFormat
 
 	// List Accesss related errors
-	ErrListAccessNotFound
-	ErrListAccessAlreadyExists
-	ErrListAccessOwnerAlreadyExists
+	ErrorCode_ListAccessNotFound
+	ErrorCode_ListAccessAlreadyExists
+	ErrorCode_ListAccessOwnerAlreadyExists
 
 	// Task related errors
-	ErrTaskNotFoundCode
+	ErrorCode_TaskNotFoundCode
 
 	// Secret related errors
-	ErrSecretNotFound
+	ErrorCode_SecretNotFound
 )
 
 type StoreError struct {
-	Code         StoreErrorCode
+	Code         ErrorCode
 	Msg          string
 	WrappedError error
 }
