@@ -47,7 +47,9 @@ func CreateList(c *gin.Context) {
 	}
 
 	// Perform creation
-	var serr *store.StoreError = ST.CreateList(ctx, store.CreateListParams{
+	var listID store.ListID
+	var serr *store.StoreError
+	listID, serr = ST.CreateList(ctx, store.CreateListParams{
 		Name: body.Name,
 	})
 
@@ -59,7 +61,11 @@ func CreateList(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusCreated)
+	c.JSON(http.StatusCreated, gin.H{
+		"list": gin.H{
+			"id": listID,
+		},
+	})
 }
 
 func GetList(c *gin.Context) {
