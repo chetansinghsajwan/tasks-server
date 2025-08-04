@@ -9,24 +9,19 @@ import (
 	"tasks/store"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type PostgresTaskStore struct {
-	Pool *pgxpool.Pool
-}
-
-func (ts *PostgresTaskStore) CreateTask(ctx context.Context,
+func (st PostgresStore) CreateTask(ctx context.Context,
 	args store.CreateTaskParams) (store.TaskID, *store.StoreError) {
 
-	var query = `
+	const query = `
 		insert into tasks(list_id, title, description, priority, due_date, assignee, labels)
 		values ($1, $2, $3, $4, $5, $6, $7)
 		returning id
 	`
 
 	var taskId store.TaskID
-	var row = ts.Pool.QueryRow(ctx, query, args.ListID, args.Title, args.Description, args.Priority, args.DueDate, args.Labels)
+	var row = st.Pool.QueryRow(ctx, query, args.ListID, args.Title, args.Description, args.Priority, args.DueDate, args.Labels)
 	var err = row.Scan(&taskId)
 
 	if err != nil {
@@ -47,17 +42,17 @@ func (ts *PostgresTaskStore) CreateTask(ctx context.Context,
 	return taskId, nil
 }
 
-func (ts *PostgresTaskStore) GetTask(ctx context.Context,
+func (st PostgresStore) GetTask(ctx context.Context,
 	id store.TaskID) (*store.Task, *store.StoreError) {
 
-	var query = `
+	const query = `
 		select id, list_id, title, description, priority, due_date, assignee, labels
 		from tasks
 		where id = $1
 	`
 
 	var task store.Task
-	var err error = ts.Pool.QueryRow(ctx, query, id).Scan(
+	var err error = st.Pool.QueryRow(ctx, query, id).Scan(
 		&task.ID, &task.ListID, &task.Title, &task.Description, &task.Priority, &task.DueDate, &task.Assignee, &task.Labels,
 	)
 
@@ -82,7 +77,7 @@ func (ts *PostgresTaskStore) GetTask(ctx context.Context,
 	return &task, nil
 }
 
-func (ts *PostgresTaskStore) UpdateTask(ctx context.Context, id store.TaskID, args store.UpdateTaskParams) *store.StoreError {
+func (st PostgresStore) UpdateTask(ctx context.Context, id store.TaskID, args store.UpdateTaskParams) *store.StoreError {
 
 	var queryBuilder strings.Builder
 	queryBuilder.WriteString("update tasks set")
@@ -156,7 +151,7 @@ func (ts *PostgresTaskStore) UpdateTask(ctx context.Context, id store.TaskID, ar
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = ts.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,
@@ -177,17 +172,17 @@ func (ts *PostgresTaskStore) UpdateTask(ctx context.Context, id store.TaskID, ar
 	return nil
 }
 
-func (ts *PostgresTaskStore) DeleteTask(ctx context.Context,
+func (st PostgresStore) DeleteTask(ctx context.Context,
 	id store.TaskID) *store.StoreError {
 
-	var query = `
+	const query = `
 		delete from tasks
 		where id = $1
 	`
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = ts.Pool.Exec(ctx, query, id); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, query, id); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,

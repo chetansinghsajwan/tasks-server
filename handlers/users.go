@@ -47,7 +47,7 @@ func CreateUser(c *gin.Context) {
 
 	defer cancel()
 
-	var us store.UserStore = pg.PgUserStore{
+	var st store.Store = pg.PostgresStore{
 		Pool: db.Pool,
 	}
 
@@ -63,7 +63,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	var serr *store.StoreError
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          body.ID,
 		Email:       body.Email,
 		FullName:    body.FullName,
@@ -130,13 +130,13 @@ func GetUser(c *gin.Context) {
 
 	defer cancel()
 
-	var us store.UserStore = pg.PgUserStore{
+	var st store.Store = pg.PostgresStore{
 		Pool: db.Pool,
 	}
 
 	var err error
 	var userId store.UserID
-	if userId, err = us.ParseUserID(c.Param("id")); err != nil {
+	if userId, err = store.ParseUserID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": fmt.Sprintf("user id parse failed, err: %s", err.Error()),
@@ -146,7 +146,7 @@ func GetUser(c *gin.Context) {
 
 	var user *store.User
 	var serr *store.StoreError
-	if user, serr = us.GetUser(ctx, userId); serr != nil {
+	if user, serr = st.GetUser(ctx, userId); serr != nil {
 
 		switch serr.Code {
 		case store.ErrUserNotFoundCode:
@@ -176,13 +176,13 @@ func UpdateUser(c *gin.Context) {
 
 	defer cancel()
 
-	var us store.UserStore = pg.PgUserStore{
+	var st store.Store = pg.PostgresStore{
 		Pool: db.Pool,
 	}
 
 	var err error
 	var userId store.UserID
-	if userId, err = us.ParseUserID(c.Param("id")); err != nil {
+	if userId, err = store.ParseUserID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": fmt.Sprintf("user id parse failed, err: %s", err.Error()),
@@ -207,7 +207,7 @@ func UpdateUser(c *gin.Context) {
 		FullName:    option.Some(body.FullName),
 		DisplayName: option.Some(body.DisplayName),
 	}
-	if serr = us.UpdateUser(ctx, userId, args); serr != nil {
+	if serr = st.UpdateUser(ctx, userId, args); serr != nil {
 
 		switch serr.Code {
 		case store.ErrUserNotFoundCode,
@@ -243,13 +243,13 @@ func DeleteUser(c *gin.Context) {
 
 	defer cancel()
 
-	var us store.UserStore = pg.PgUserStore{
+	var st store.Store = pg.PostgresStore{
 		Pool: db.Pool,
 	}
 
 	var userId store.UserID
 	var err error
-	if userId, err = us.ParseUserID(c.Param("id")); err != nil {
+	if userId, err = store.ParseUserID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -258,7 +258,7 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	var serr *store.StoreError
-	if serr = us.DeleteUser(ctx, userId); serr != nil {
+	if serr = st.DeleteUser(ctx, userId); serr != nil {
 
 		switch serr.Code {
 		case store.ErrUserNotFoundCode:

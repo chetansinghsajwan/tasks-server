@@ -9,14 +9,9 @@ import (
 	"tasks/store"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type PostgresListStore struct {
-	Pool *pgxpool.Pool
-}
-
-func (ls *PostgresListStore) ParseListID(id string) (store.ListID, error) {
+func (st PostgresStore) ParseListID(id string) (store.ListID, error) {
 
 	if len(strings.TrimSpace(id)) == 0 {
 		return "", errors.New("list id must not be empty")
@@ -25,17 +20,17 @@ func (ls *PostgresListStore) ParseListID(id string) (store.ListID, error) {
 	return store.ListID(id), nil
 }
 
-func (ls *PostgresListStore) CreateList(ctx context.Context,
+func (st PostgresStore) CreateList(ctx context.Context,
 	args store.CreateListParams) *store.StoreError {
 
-	var query = `
+	const query = `
 		insert into lists(id, owner_id)
 		values ($1, $2)
 	`
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = ls.Pool.Exec(ctx, query, args.ID, args.OwnerID); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, query, args.ID, args.OwnerID); err != nil {
 
 		var pgerr *pgconn.PgError
 		if errors.As(err, &pgerr) {
@@ -62,17 +57,17 @@ func (ls *PostgresListStore) CreateList(ctx context.Context,
 	return nil
 }
 
-func (ls *PostgresListStore) GetList(ctx context.Context,
+func (st PostgresStore) GetList(ctx context.Context,
 	id store.ListID, owner_id store.UserID) (*store.List, *store.StoreError) {
 
-	var query = `
+	const query = `
 		select id, owner_id
 		from lists
 		where id = $1 and owner_id = $2
 	`
 
 	var list store.List
-	var err error = ls.Pool.QueryRow(ctx, query, id, owner_id).Scan(
+	var err error = st.Pool.QueryRow(ctx, query, id, owner_id).Scan(
 		&list.ID, &list.OwnerID,
 	)
 
@@ -97,7 +92,7 @@ func (ls *PostgresListStore) GetList(ctx context.Context,
 	return &list, nil
 }
 
-func (ls *PostgresListStore) UpdateList(ctx context.Context, id store.ListID,
+func (st PostgresStore) UpdateList(ctx context.Context, id store.ListID,
 	owner_id store.UserID, args store.UpdateListParams) *store.StoreError {
 
 	var queryBuilder strings.Builder
@@ -135,7 +130,7 @@ func (ls *PostgresListStore) UpdateList(ctx context.Context, id store.ListID,
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = ls.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,
@@ -156,17 +151,17 @@ func (ls *PostgresListStore) UpdateList(ctx context.Context, id store.ListID,
 	return nil
 }
 
-func (ls *PostgresListStore) DeleteList(ctx context.Context,
+func (st PostgresStore) DeleteList(ctx context.Context,
 	id store.ListID, owner_id store.UserID) *store.StoreError {
 
-	var query = `
+	const query = `
 		delete from lists
 		where id = $1 and owner_id = $2
 	`
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = ls.Pool.Exec(ctx, query, id, owner_id); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, query, id, owner_id); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,

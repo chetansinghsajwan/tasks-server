@@ -8,14 +8,9 @@ import (
 	"tasks/store"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type PostgresListAccessStore struct {
-	Pool *pgxpool.Pool
-}
-
-func (las *PostgresListAccessStore) AddAccess(ctx context.Context, args store.ListAccess) *store.StoreError {
+func (st PostgresStore) AddAccess(ctx context.Context, args store.ListAccess) *store.StoreError {
 
 	const query = `
 		insert into list_access (user_id, list_id, access)
@@ -24,7 +19,7 @@ func (las *PostgresListAccessStore) AddAccess(ctx context.Context, args store.Li
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = las.Pool.Exec(ctx, query, args.UserID, args.ListID, args.Access); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, query, args.UserID, args.ListID, args.Access); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,
@@ -45,7 +40,7 @@ func (las *PostgresListAccessStore) AddAccess(ctx context.Context, args store.Li
 	return nil
 }
 
-func (las *PostgresListAccessStore) HasAccess(ctx context.Context, args store.ListAccess) (bool, *store.StoreError) {
+func (st PostgresStore) HasAccess(ctx context.Context, args store.ListAccess) (bool, *store.StoreError) {
 
 	const query = `
 		select access
@@ -54,7 +49,7 @@ func (las *PostgresListAccessStore) HasAccess(ctx context.Context, args store.Li
 	`
 
 	var access string
-	var row = las.Pool.QueryRow(ctx, query, args.UserID, args.ListID, args.Access)
+	var row = st.Pool.QueryRow(ctx, query, args.UserID, args.ListID, args.Access)
 	var err = row.Scan(&access)
 
 	if err != nil {
@@ -73,7 +68,7 @@ func (las *PostgresListAccessStore) HasAccess(ctx context.Context, args store.Li
 	return true, nil
 }
 
-func (las *PostgresListAccessStore) RemoveAccesses(ctx context.Context, args store.RemoveListAccessParams) *store.StoreError {
+func (st PostgresStore) RemoveAccesses(ctx context.Context, args store.RemoveListAccessParams) *store.StoreError {
 
 	const query = `
 		delete from list_access
@@ -82,7 +77,7 @@ func (las *PostgresListAccessStore) RemoveAccesses(ctx context.Context, args sto
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = las.Pool.Exec(ctx, query, args.UserID, args.ListID, args.Access); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, query, args.UserID, args.ListID, args.Access); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,

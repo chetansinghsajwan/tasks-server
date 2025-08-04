@@ -2,107 +2,32 @@ package store
 
 import (
 	"context"
-	"fmt"
-	"os"
-
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var Pool *pgxpool.Pool
+type Store interface {
+	CreateUser(ctx context.Context, args CreateUserParams) *StoreError
+	GetUser(ctx context.Context, id UserID) (*User, *StoreError)
+	GetUsersWhere(ctx context.Context, where string, count uint, from uint) ([]User, *StoreError)
+	UpdateUser(ctx context.Context, id UserID, args UpdateUserParams) *StoreError
+	DeleteUser(ctx context.Context, id UserID) *StoreError
 
-type StoreErrorCode uint32
+	ParseListID(id string) (ListID, error)
+	CreateList(ctx context.Context, args CreateListParams) *StoreError
+	GetList(ctx context.Context, id ListID, owner_id UserID) (*List, *StoreError)
+	UpdateList(ctx context.Context, id ListID, owner_id UserID, args UpdateListParams) *StoreError
+	DeleteList(ctx context.Context, id ListID, owner_id UserID) *StoreError
 
-const (
-	ErrUnknown StoreErrorCode = iota
-	ErrTxCreateCode
-	ErrTxCommitCode
+	CreateSecret(ctx context.Context, args CreateSecretParams) *StoreError
+	GetSecret(ctx context.Context, key SecretKey) (*Secret, *StoreError)
+	UpdateSecret(ctx context.Context, key SecretKey, args UpdateSecretParams) *StoreError
+	DeleteSecret(ctx context.Context, key SecretKey) *StoreError
 
-	// User related errors
-	ErrUserNotFoundCode
-	ErrUserIDNullCode
-	ErrUserIDAlreadyExistsCode
-	ErrUserIDFormatCode
-	ErrUserEmailNullCode
-	ErrUserEmailAlreadyExistsCode
-	ErrUserEmailFormatCode
-	ErrUserFullNameFormatCode
-	ErrUserDisplayNameFormatCode
+	GetTask(ctx context.Context, id TaskID) (*Task, *StoreError)
+	CreateTask(ctx context.Context, args CreateTaskParams) (TaskID, *StoreError)
+	UpdateTask(ctx context.Context, id TaskID, args UpdateTaskParams) *StoreError
+	DeleteTask(ctx context.Context, id TaskID) *StoreError
 
-	// List related errors
-	ErrListNotFoundCode
-	ErrListIDNullCode
-	ErrListIDAlreadyExistsCode
-	ErrListIDFormatCode
-
-	// List Accesss related errors
-	ErrListAccessNotFound
-	ErrListAccessAlreadyExists
-	ErrListAccessOwnerAlreadyExists
-
-	// Task related errors
-	ErrTaskNotFoundCode
-
-	// Secret related errors
-	ErrSecretNotFound
-)
-
-type StoreError struct {
-	Code         StoreErrorCode
-	Msg          string
-	WrappedError error
-}
-
-func (e *StoreError) Error() string {
-	return e.Msg
-}
-
-func (e *StoreError) Unwrap() error {
-	return e.WrappedError
-}
-
-func PrintPgError(err *pgconn.PgError) {
-
-	fmt.Printf("--------------------------------------------------------------------\n")
-	fmt.Printf("PGERROR: Severity: %v\n", err.Severity)
-	fmt.Printf("PGERROR: SeverityUnlocalized: %v\n", err.SeverityUnlocalized)
-	fmt.Printf("PGERROR: Code: %v\n", err.Code)
-	fmt.Printf("PGERROR: Message: %v\n", err.Message)
-	fmt.Printf("PGERROR: Detail: %v\n", err.Detail)
-	fmt.Printf("PGERROR: Hint: %v\n", err.Hint)
-	fmt.Printf("PGERROR: Position: %v\n", err.Position)
-	fmt.Printf("PGERROR: InternalPosition: %v\n", err.InternalPosition)
-	fmt.Printf("PGERROR: InternalQuery: %v\n", err.InternalQuery)
-	fmt.Printf("PGERROR: Where: %v\n", err.Where)
-	fmt.Printf("PGERROR: SchemaName: %v\n", err.SchemaName)
-	fmt.Printf("PGERROR: TableName: %v\n", err.TableName)
-	fmt.Printf("PGERROR: ColumnName: %v\n", err.ColumnName)
-	fmt.Printf("PGERROR: DataTypeName: %v\n", err.DataTypeName)
-	fmt.Printf("PGERROR: ConstraintName: %v\n", err.ConstraintName)
-	fmt.Printf("PGERROR: File: %v\n", err.File)
-	fmt.Printf("PGERROR: Line: %v\n", err.Line)
-	fmt.Printf("PGERROR: Routine: %v\n", err.Routine)
-	fmt.Printf("--------------------------------------------------------------------\n")
-}
-
-func Init() {
-
-	var connString = os.Getenv("DATABASE_URL")
-	if connString == "" {
-		panic("DATABASE_URL environment variable is not set")
-	}
-
-	var ctx = context.Background()
-
-	var err error
-	Pool, err := pgxpool.New(ctx, connString)
-	if err != nil {
-		panic("Failed to connect to the database: " + err.Error())
-	}
-
-	if err := Pool.Ping(ctx); err != nil {
-		panic("Failed to ping the database: " + err.Error())
-	}
-
-	println("Database connection established successfully")
+	AddAccess(ctx context.Context, args ListAccess) *StoreError
+	HasAccess(ctx context.Context, args ListAccess) (bool, *StoreError)
+	RemoveAccesses(ctx context.Context, args RemoveListAccessParams) *StoreError
 }

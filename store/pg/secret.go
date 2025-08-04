@@ -9,23 +9,18 @@ import (
 	"tasks/store"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type PostgresSecretStore struct {
-	Pool *pgxpool.Pool
-}
+func (st PostgresStore) CreateSecret(ctx context.Context, args store.CreateSecretParams) *store.StoreError {
 
-func (ss *PostgresSecretStore) CreateSecret(ctx context.Context, args store.CreateSecretParams) *store.StoreError {
-
-	var query = `
+	const query = `
 		insert into secrets (id, scope, pass)
 		values ($1, $2, $3)
 	`
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = ss.Pool.Exec(ctx, query, args.ID, args.Scope, args.Pass); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, query, args.ID, args.Scope, args.Pass); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,
@@ -46,16 +41,16 @@ func (ss *PostgresSecretStore) CreateSecret(ctx context.Context, args store.Crea
 	return nil
 }
 
-func (ss *PostgresSecretStore) GetSecret(ctx context.Context, key store.SecretKey) (*store.Secret, *store.StoreError) {
+func (st PostgresStore) GetSecret(ctx context.Context, key store.SecretKey) (*store.Secret, *store.StoreError) {
 
-	var query = `
+	const query = `
 		select key, scope, pass
 		from secrets
 		where key = $1 and scope = $2
 	`
 
 	var secret store.Secret
-	var row = ss.Pool.QueryRow(ctx, query, key.ID, key.Scope)
+	var row = st.Pool.QueryRow(ctx, query, key.ID, key.Scope)
 	var err = row.Scan(&secret.ID, &secret.Scope, &secret.Pass)
 
 	if err != nil {
@@ -79,7 +74,7 @@ func (ss *PostgresSecretStore) GetSecret(ctx context.Context, key store.SecretKe
 	return &secret, nil
 }
 
-func (ss *PostgresSecretStore) UpdateSecret(ctx context.Context, key store.SecretKey, args store.UpdateSecretParams) *store.StoreError {
+func (st PostgresStore) UpdateSecret(ctx context.Context, key store.SecretKey, args store.UpdateSecretParams) *store.StoreError {
 
 	var queryBuilder strings.Builder
 	queryBuilder.WriteString("update secrets set")
@@ -126,7 +121,7 @@ func (ss *PostgresSecretStore) UpdateSecret(ctx context.Context, key store.Secre
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = ss.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,
@@ -147,16 +142,16 @@ func (ss *PostgresSecretStore) UpdateSecret(ctx context.Context, key store.Secre
 	return nil
 }
 
-func (ss *PostgresSecretStore) DeleteSecret(ctx context.Context, key store.SecretKey) *store.StoreError {
+func (st PostgresStore) DeleteSecret(ctx context.Context, key store.SecretKey) *store.StoreError {
 
-	var query = `
+	const query = `
 		delete from secrets
 		where key = $1 and scope = $2
 	`
 
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = ss.Pool.Exec(ctx, query, key.ID, key.Scope); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, query, key.ID, key.Scope); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,

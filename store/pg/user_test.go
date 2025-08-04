@@ -31,7 +31,7 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	// Setup stores
-	var us = pg.PgUserStore{Pool: pool}
+	var us = pg.PostgresStore{Pool: pool}
 
 	// Test create user
 	var serr *store.StoreError

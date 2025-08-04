@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"fmt"
 	"tasks/option"
 	"tasks/utils"
@@ -62,14 +61,4 @@ type UpdateTaskParams struct {
 	DueDate     option.Option[*time.Time] `db:"due_date" json:"due_date"`
 	Assignee    option.Option[*UserID]    `db:"assignee" json:"assignee"`
 	Labels      option.Option[[]string]   `db:"labels" json:"labels"`
-}
-
-type TaskStore interface {
-	NullTaskID() TaskID
-	ParseTaskID(id string) (TaskID, error)
-	GetTask(ctx context.Context, id TaskID) (*Task, *StoreError)
-	GetTasksWhere(ctx context.Context, where string, count uint, from uint) ([]Task, *StoreError)
-	CreateTask(ctx context.Context, args CreateTaskParams) (TaskID, *StoreError)
-	UpdateTask(ctx context.Context, id TaskID, args UpdateTaskParams) *StoreError
-	DeleteTask(ctx context.Context, id TaskID) *StoreError
 }

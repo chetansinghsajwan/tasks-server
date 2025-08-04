@@ -1,7 +1,8 @@
 package store
 
 import (
-	"context"
+	"errors"
+	"strings"
 	"tasks/option"
 )
 
@@ -28,11 +29,19 @@ type UpdateUserParams struct {
 	DisplayName option.StringPtr
 }
 
-type UserStore interface {
-	ParseUserID(id string) (UserID, error)
-	CreateUser(ctx context.Context, args CreateUserParams) *StoreError
-	GetUser(ctx context.Context, id UserID) (*User, *StoreError)
-	GetUsersWhere(ctx context.Context, where string, count uint, from uint) ([]User, *StoreError)
-	UpdateUser(ctx context.Context, id UserID, args UpdateUserParams) *StoreError
-	DeleteUser(ctx context.Context, id UserID) *StoreError
+func NullUserID() UserID {
+	return ""
+}
+
+func ParseUserID(id string) (UserID, error) {
+
+	if len(strings.TrimSpace(id)) == 0 {
+		return "", errors.New("user id must not be empty")
+	}
+
+	return UserID(id), nil
+}
+
+func (id UserID) String() string {
+	return string(id)
 }

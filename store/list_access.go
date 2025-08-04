@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"tasks/option"
 )
 
@@ -25,10 +24,4 @@ type RemoveListAccessParams struct {
 	UserID option.Option[UserID]
 	ListID option.Option[ListID]
 	Access option.Option[ListAccessType]
-}
-
-type ListAccessStore interface {
-	AddAccess(ctx context.Context, args ListAccess) *StoreError
-	HasAccess(ctx context.Context, args ListAccess) (bool, *StoreError)
-	RemoveAccesses(ctx context.Context, args RemoveListAccessParams) *StoreError
 }

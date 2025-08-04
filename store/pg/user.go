@@ -11,37 +11,23 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
-
-type PgUserStore struct {
-	Pool *pgxpool.Pool
-}
 
 const userIdFormatHint string = ""
 const userEmailFormatHint string = ""
 const userFullNameFormatHint string = ""
 const userDisplayNameFormatHint string = ""
 
-func (us PgUserStore) ParseUserID(id string) (store.UserID, error) {
+func (st PostgresStore) GetUser(ctx context.Context, id store.UserID) (*store.User, *store.StoreError) {
 
-	if len(strings.TrimSpace(id)) == 0 {
-		return "", errors.New("user id must not be emtpy")
-	}
-
-	return store.UserID(id), nil
-}
-
-func (us PgUserStore) GetUser(ctx context.Context, id store.UserID) (*store.User, *store.StoreError) {
-
-	var query = `
+	const query = `
 		SELECT id, email, full_name, display_name
 		FROM users
 		WHERE id = $1
 	`
 
 	var user store.User
-	var err = us.Pool.QueryRow(ctx, query, id).Scan(
+	var err = st.Pool.QueryRow(ctx, query, id).Scan(
 		&user.ID, &user.Email, &user.FullName, &user.DisplayName,
 	)
 
@@ -66,9 +52,9 @@ func (us PgUserStore) GetUser(ctx context.Context, id store.UserID) (*store.User
 	return &user, nil
 }
 
-func (us PgUserStore) GetUsersWhere(ctx context.Context, where string, count uint, from uint) ([]store.User, *store.StoreError) {
+func (st PostgresStore) GetUsersWhere(ctx context.Context, where string, count uint, from uint) ([]store.User, *store.StoreError) {
 
-	var query = `
+	const query = `
 		SELECT id, email, full_name, display_name
 		FROM users
 		WHERE $1
@@ -78,7 +64,7 @@ func (us PgUserStore) GetUsersWhere(ctx context.Context, where string, count uin
 
 	var err error
 	var rows pgx.Rows
-	rows, err = us.Pool.Query(ctx, query, where, from, count)
+	rows, err = st.Pool.Query(ctx, query, where, from, count)
 
 	if err != nil {
 
@@ -117,15 +103,15 @@ func (us PgUserStore) GetUsersWhere(ctx context.Context, where string, count uin
 	return users, nil
 }
 
-func (us PgUserStore) CreateUser(ctx context.Context, args store.CreateUserParams) *store.StoreError {
+func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserParams) *store.StoreError {
 
-	var query = `
+	const query = `
 		INSERT INTO users (id, email, full_name, display_name)
 		VALUES ($1, $2, $3, $4);
 	`
 	var cmd pgconn.CommandTag
 	var err error
-	cmd, err = us.Pool.Exec(ctx, query, args.ID, args.Email, args.FullName, args.DisplayName)
+	cmd, err = st.Pool.Exec(ctx, query, args.ID, args.Email, args.FullName, args.DisplayName)
 
 	if err != nil {
 
@@ -225,7 +211,7 @@ func (us PgUserStore) CreateUser(ctx context.Context, args store.CreateUserParam
 	return nil
 }
 
-func (us PgUserStore) UpdateUser(ctx context.Context, id store.UserID, args store.UpdateUserParams) *store.StoreError {
+func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args store.UpdateUserParams) *store.StoreError {
 
 	// Build the query
 	var queryBuilder strings.Builder
@@ -263,7 +249,7 @@ func (us PgUserStore) UpdateUser(ctx context.Context, id store.UserID, args stor
 	// Execute the query
 	var cmd pgconn.CommandTag
 	var err error
-	cmd, err = us.Pool.Exec(ctx, queryBuilder.String(), queryArgs...)
+	cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...)
 
 	// Error handling
 	if err != nil {
@@ -354,16 +340,16 @@ func (us PgUserStore) UpdateUser(ctx context.Context, id store.UserID, args stor
 	return nil
 }
 
-func (us PgUserStore) DeleteUser(ctx context.Context, id store.UserID) *store.StoreError {
+func (st PostgresStore) DeleteUser(ctx context.Context, id store.UserID) *store.StoreError {
 
-	var query = `
+	const query = `
 		DELETE FROM users
 		WHERE id = $0
 	`
 
 	var cmd pgconn.CommandTag
 	var err error
-	cmd, err = us.Pool.Exec(ctx, query, id)
+	cmd, err = st.Pool.Exec(ctx, query, id)
 
 	if err != nil {
 
