@@ -7,44 +7,33 @@ import (
 	"fmt"
 	"tasks/store"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func (st PostgresStore) CreateList(ctx context.Context,
-	args store.CreateListParams) *store.StoreError {
+	args store.CreateListParams) (store.ListID, *store.StoreError) {
 
 	const query = `
-		insert into lists(id, name)
-		values ($1, $2)
+		insert into lists(name)
+		values ($1)
+		returning id
 	`
 
-	var cmd pgconn.CommandTag
+	var row pgx.Row = st.Pool.QueryRow(ctx, query, args.Name)
+
+	var listID store.ListID
 	var err error
-	if cmd, err = st.Pool.Exec(ctx, query, args.ID, args.Name); err != nil {
+	if err = row.Scan(&listID); err != nil {
 
-		var pgerr *pgconn.PgError
-		if errors.As(err, &pgerr) {
-
-			store.PrintPgError(pgerr)
-		}
-
-		return &store.StoreError{
+		return store.NullListID(), &store.StoreError{
 			Code:         store.ErrUnknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
 	}
 
-	if !cmd.Insert() {
-
-		return &store.StoreError{
-			Code:         store.ErrUnknown,
-			Msg:          "unknown error",
-			WrappedError: err,
-		}
-	}
-
-	return nil
+	return listID, nil
 }
 
 func (st PostgresStore) GetList(ctx context.Context,

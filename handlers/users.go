@@ -242,7 +242,7 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	var serr *store.StoreError
-	if serr = st.DeleteUser(ctx, userId); serr != nil {
+	if serr = ST.DeleteUser(ctx, userId); serr != nil {
 
 		switch serr.Code {
 		case store.ErrUserNotFoundCode:

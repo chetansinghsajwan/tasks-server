@@ -11,7 +11,7 @@ type Store interface {
 	UpdateUser(ctx context.Context, id UserID, args UpdateUserParams) *StoreError
 	DeleteUser(ctx context.Context, id UserID) *StoreError
 
-	CreateList(ctx context.Context, args CreateListParams) *StoreError
+	CreateList(ctx context.Context, args CreateListParams) (ListID, *StoreError)
 	GetList(ctx context.Context, id ListID) (*List, *StoreError)
 	UpdateList(ctx context.Context, id ListID, args UpdateListParams) *StoreError
 	DeleteList(ctx context.Context, id ListID) *StoreError
