@@ -70,7 +70,7 @@ func GetList(c *gin.Context) {
 	defer cancel()
 
 	// Parse list id
-	var listId, err = store.ParseListID(c.Param("id"))
+	var listID, err = store.ParseListID(c.Param("id"))
 	if err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -82,7 +82,7 @@ func GetList(c *gin.Context) {
 	// Get list
 	var list *store.List
 	var serr *store.StoreError
-	list, serr = ST.GetList(ctx, listId)
+	list, serr = ST.GetList(ctx, listID)
 
 	if serr != nil {
 
@@ -105,9 +105,9 @@ func UpdateList(c *gin.Context) {
 	defer cancel()
 
 	// Parse list id
-	var listId store.ListID
+	var listID store.ListID
 	var err error
-	if listId, err = store.ParseListID(c.Param("id")); err != nil {
+	if listID, err = store.ParseListID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -127,7 +127,7 @@ func UpdateList(c *gin.Context) {
 	}
 
 	// Update the list
-	var serr *store.StoreError = ST.UpdateList(ctx, listId, store.UpdateListParams{
+	var serr *store.StoreError = ST.UpdateList(ctx, listID, store.UpdateListParams{
 		Name: body.Name,
 	})
 
@@ -150,9 +150,9 @@ func DeleteList(c *gin.Context) {
 	defer cancel()
 
 	// Parse list id
-	var listId store.ListID
+	var listID store.ListID
 	var err error
-	if listId, err = store.ParseListID(c.Param("id")); err != nil {
+	if listID, err = store.ParseListID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -161,7 +161,7 @@ func DeleteList(c *gin.Context) {
 	}
 
 	// Perform deletion
-	var serr *store.StoreError = ST.DeleteList(ctx, listId)
+	var serr *store.StoreError = ST.DeleteList(ctx, listID)
 	if serr != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{

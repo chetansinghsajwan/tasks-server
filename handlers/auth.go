@@ -20,12 +20,12 @@ const (
 	AccessTokenCookieLifetime = 3600
 )
 
-func GenerateToken(userId string) (string, error) {
+func GenerateToken(userID string) (string, error) {
 
 	var claims = jwt.NewWithClaims(
 		jwt.SigningMethodPS256.SigningMethodRSA,
 		jwt.MapClaims{
-			"id":         userId,
+			"id":         userID,
 			"expires_at": time.Now().Add(time.Hour * 2),
 		},
 	)

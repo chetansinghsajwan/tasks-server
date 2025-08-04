@@ -20,9 +20,9 @@ func (st PostgresStore) CreateTask(ctx context.Context,
 		returning id
 	`
 
-	var taskId store.TaskID
+	var taskID store.TaskID
 	var row = st.Pool.QueryRow(ctx, query, args.ListID, args.Title, args.Description, args.Priority, args.DueDate, args.Labels)
-	var err = row.Scan(&taskId)
+	var err = row.Scan(&taskID)
 
 	if err != nil {
 
@@ -39,7 +39,7 @@ func (st PostgresStore) CreateTask(ctx context.Context,
 		}
 	}
 
-	return taskId, nil
+	return taskID, nil
 }
 
 func (st PostgresStore) GetTask(ctx context.Context,

@@ -127,8 +127,8 @@ func GetUser(c *gin.Context) {
 	defer cancel()
 
 	var err error
-	var userId store.UserID
-	if userId, err = store.ParseUserID(c.Param("id")); err != nil {
+	var userID store.UserID
+	if userID, err = store.ParseUserID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": fmt.Sprintf("user id parse failed, err: %s", err.Error()),
@@ -138,7 +138,7 @@ func GetUser(c *gin.Context) {
 
 	var user *store.User
 	var serr *store.StoreError
-	if user, serr = ST.GetUser(ctx, userId); serr != nil {
+	if user, serr = ST.GetUser(ctx, userID); serr != nil {
 
 		switch serr.Code {
 		case store.ErrUserNotFoundCode:
@@ -169,8 +169,8 @@ func UpdateUser(c *gin.Context) {
 	defer cancel()
 
 	var err error
-	var userId store.UserID
-	if userId, err = store.ParseUserID(c.Param("id")); err != nil {
+	var userID store.UserID
+	if userID, err = store.ParseUserID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": fmt.Sprintf("user id parse failed, err: %s", err.Error()),
@@ -195,7 +195,7 @@ func UpdateUser(c *gin.Context) {
 		FullName:    option.Some(body.FullName),
 		DisplayName: option.Some(body.DisplayName),
 	}
-	if serr = ST.UpdateUser(ctx, userId, args); serr != nil {
+	if serr = ST.UpdateUser(ctx, userID, args); serr != nil {
 
 		switch serr.Code {
 		case store.ErrUserNotFoundCode,
@@ -231,9 +231,9 @@ func DeleteUser(c *gin.Context) {
 
 	defer cancel()
 
-	var userId store.UserID
+	var userID store.UserID
 	var err error
-	if userId, err = store.ParseUserID(c.Param("id")); err != nil {
+	if userID, err = store.ParseUserID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -242,7 +242,7 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	var serr *store.StoreError
-	if serr = ST.DeleteUser(ctx, userId); serr != nil {
+	if serr = ST.DeleteUser(ctx, userID); serr != nil {
 
 		switch serr.Code {
 		case store.ErrUserNotFoundCode:

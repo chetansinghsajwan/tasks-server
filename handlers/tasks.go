@@ -54,9 +54,9 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	var taskId store.TaskID
+	var taskID store.TaskID
 	var serr *store.StoreError
-	taskId, serr = ST.CreateTask(ctx, store.CreateTaskParams{
+	taskID, serr = ST.CreateTask(ctx, store.CreateTaskParams{
 		ListID:      body.ListID,
 		Title:       body.Title,
 		Description: body.Description,
@@ -75,7 +75,7 @@ func CreateTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"taskId": taskId,
+		"taskID": taskID,
 	})
 }
 
@@ -86,7 +86,7 @@ func GetTask(c *gin.Context) {
 
 	defer cancel()
 
-	var taskId, err = store.ParseTaskID(c.Param("id"))
+	var taskID, err = store.ParseTaskID(c.Param("id"))
 	if err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -97,7 +97,7 @@ func GetTask(c *gin.Context) {
 
 	var task *store.Task
 	var serr *store.StoreError
-	task, serr = ST.GetTask(ctx, taskId)
+	task, serr = ST.GetTask(ctx, taskID)
 
 	if serr != nil {
 
@@ -119,9 +119,9 @@ func UpdateTask(c *gin.Context) {
 
 	defer cancel()
 
-	var taskId store.TaskID
+	var taskID store.TaskID
 	var err error
-	if taskId, err = store.ParseTaskID(c.Param("id")); err != nil {
+	if taskID, err = store.ParseTaskID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -138,7 +138,7 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 
-	var serr *store.StoreError = ST.UpdateTask(ctx, taskId, store.UpdateTaskParams{
+	var serr *store.StoreError = ST.UpdateTask(ctx, taskID, store.UpdateTaskParams{
 		ListID:      body.ListID,
 		Title:       body.Title,
 		Description: body.Description,
@@ -168,9 +168,9 @@ func DeleteTask(c *gin.Context) {
 
 	defer cancel()
 
-	var taskId store.TaskID
+	var taskID store.TaskID
 	var err error
-	if taskId, err = store.ParseTaskID(c.Param("id")); err != nil {
+	if taskID, err = store.ParseTaskID(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -178,7 +178,7 @@ func DeleteTask(c *gin.Context) {
 		return
 	}
 
-	var serr *store.StoreError = ST.DeleteTask(ctx, taskId)
+	var serr *store.StoreError = ST.DeleteTask(ctx, taskID)
 
 	if serr != nil {
 
