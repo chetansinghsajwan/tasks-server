@@ -2,24 +2,42 @@ package pg
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"fmt"
+	"strings"
 	"tasks/store"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func (st PostgresStore) AddAccess(ctx context.Context, args store.ListAccess) *store.StoreError {
+func (st PostgresStore) AddAccess(ctx context.Context, args store.AddListAccessParams) *store.StoreError {
 
-	const query = `
-		insert into list_access (user_id, list_id, access)
-		values ($1, $2, $3)
-	`
+	// There are no accesses to add
+	if len(args.Access) == 0 {
+		return nil
+	}
 
+	// Build the query
+	var queryArgs = []any{args.UserID, args.ListID}
+	var queryBuilder strings.Builder
+
+	queryBuilder.WriteString("insert into list_access (user_id, list_id, access) values ")
+
+	// Add the value placeholders to the query
+	for i, access := range args.Access {
+
+		if i > 0 {
+			queryBuilder.WriteString(", ")
+		}
+
+		queryBuilder.WriteString(fmt.Sprintf("($1, $2, $%s)", i+3))
+		queryArgs = append(queryArgs, access)
+	}
+
+	// Add the accesses
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = st.Pool.Exec(ctx, query, args.UserID, args.ListID, args.Access); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,
@@ -40,44 +58,104 @@ func (st PostgresStore) AddAccess(ctx context.Context, args store.ListAccess) *s
 	return nil
 }
 
-func (st PostgresStore) HasAccess(ctx context.Context, args store.ListAccess) (bool, *store.StoreError) {
+func (st PostgresStore) GetAccess(ctx context.Context, args store.GetListAccessParams) (*store.ListAccess, *store.StoreError) {
 
 	const query = `
 		select access
 		from list_access
-		where user_id = $1 and list_id = $2 and access = $3
+		where user_id = $1 and list_id = $2
 	`
 
-	var access string
-	var row = st.Pool.QueryRow(ctx, query, args.UserID, args.ListID, args.Access)
-	var err = row.Scan(&access)
+	var rows pgx.Rows
+	var err error
 
-	if err != nil {
+	// Get the accesses
+	if rows, err = st.Pool.Query(ctx, query, args.UserID, args.ListID); err != nil {
 
-		if errors.Unwrap(err) == sql.ErrNoRows {
-			return false, nil
-		}
-
-		return false, &store.StoreError{
+		return nil, &store.StoreError{
 			Code:         store.ErrUnknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
 	}
 
-	return true, nil
+	defer rows.Close()
+
+	// Read the accesses
+	var accesses []store.ListAccessType
+	for rows.Next() {
+
+		var access store.ListAccessType
+		if err = rows.Scan(&access); err != nil {
+
+			return nil, &store.StoreError{
+				Code:         store.ErrUnknown,
+				Msg:          "unknown error",
+				WrappedError: err,
+			}
+		}
+
+		accesses = append(accesses, access)
+	}
+
+	// Check for errors in rows
+	if err = rows.Err(); err != nil {
+
+		return nil, &store.StoreError{
+			Code:         store.ErrUnknown,
+			Msg:          "unknown error",
+			WrappedError: err,
+		}
+	}
+
+	return &store.ListAccess{
+		UserID: args.UserID,
+		ListID: args.ListID,
+		Access: accesses,
+	}, nil
 }
 
 func (st PostgresStore) RemoveAccesses(ctx context.Context, args store.RemoveListAccessParams) *store.StoreError {
 
-	const query = `
-		delete from list_access
-		where user_id = $1 and list_id = $2 and access = $3
-	`
+	// There is nothing to remove
+	if args.UserID.IsNone() && args.ListID.IsNone() && args.Access.IsNone() {
+		return nil
+	}
 
+	// Build the query
+	var queryArgs []any
+	var queryBuilder strings.Builder
+	queryBuilder.WriteString("delete from list_access where ")
+
+	if args.UserID.IsSome() {
+		queryBuilder.WriteString("user_id = $1")
+		queryArgs = append(queryArgs, args.UserID.MustGet())
+	}
+
+	if args.ListID.IsSome() {
+
+		if len(queryArgs) != 0 {
+			queryBuilder.WriteString(", ")
+		}
+
+		queryBuilder.WriteString(fmt.Sprintf("list_id = $%s", len(queryArgs)+1))
+		queryArgs = append(queryArgs, args.ListID.MustGet())
+	}
+
+	if args.Access.IsSome() {
+
+		if len(queryArgs) != 0 {
+			queryBuilder.WriteString(", ")
+		}
+
+		queryBuilder.WriteString(fmt.Sprintf("access = any($%s::list_access_type[])", len(queryArgs)+1))
+		queryArgs = append(queryArgs, args.Access.MustGet())
+	}
+
+	// Delete the accesses
 	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = st.Pool.Exec(ctx, query, args.UserID, args.ListID, args.Access); err != nil {
+	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
 			Code:         store.ErrUnknown,
@@ -89,10 +167,8 @@ func (st PostgresStore) RemoveAccesses(ctx context.Context, args store.RemoveLis
 	if !cmd.Delete() {
 
 		return &store.StoreError{
-			Code: store.ErrListAccessNotFound,
-			Msg: fmt.Sprintf("list access '%s' for user '%s' and list '%s' not found",
-				args.Access, args.UserID, args.ListID),
-			WrappedError: err,
+			Code: store.ErrUnknown,
+			Msg:  "unknown error",
 		}
 	}
 

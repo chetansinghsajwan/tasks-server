@@ -26,7 +26,7 @@ type Store interface {
 	UpdateTask(ctx context.Context, id TaskID, args UpdateTaskParams) *StoreError
 	DeleteTask(ctx context.Context, id TaskID) *StoreError
 
-	AddAccess(ctx context.Context, args ListAccess) *StoreError
-	HasAccess(ctx context.Context, args ListAccess) (bool, *StoreError)
-	RemoveAccesses(ctx context.Context, args RemoveListAccessParams) *StoreError
+	GetListAccess(ctx context.Context, args GetListAccessParams) (*ListAccess, *StoreError)
+	AddListAccess(ctx context.Context, args AddListAccessParams) *StoreError
+	RemoveListAccess(ctx context.Context, args RemoveListAccessParams) *StoreError
 }
