@@ -8,28 +8,57 @@ import (
 	"strings"
 	"tasks/store"
 
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 )
+
+const invalidSecretIDFormatHint = ""
+const invalidSecretValueFormatHint = ""
+const invalidSecretScopeFormatHint = ""
 
 func (st PostgresStore) CreateSecret(ctx context.Context, args store.CreateSecretParams) *store.StoreError {
 
 	const query = `
-		insert into secrets (id, scope, pass)
+		insert into secrets (id, scope, value)
 		values ($1, $2, $3)
 	`
 
-	var cmd pgconn.CommandTag
 	var err error
-	if cmd, err = st.Pool.Exec(ctx, query, args.ID, args.Scope, args.Pass); err != nil {
+	if _, err = st.Pool.Exec(ctx, query, args.ID, args.Scope, args.Value); err != nil {
 
-		return &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
-			Msg:          "unknown error",
-			WrappedError: err,
+		var pgerr *pgconn.PgError
+		if errors.As(err, &pgerr) {
+
+			if pgerr.Code == pgerrcode.CheckViolation &&
+				pgerr.ConstraintName == "secrets_id_validation" {
+
+				return &store.StoreError{
+					Code:         store.ErrorCode_InvalidSecretIDFormat,
+					Msg:          fmt.Sprintf("secret id '%s' format is not correct. hint: %s", args.ID, invalidSecretIDFormatHint),
+					WrappedError: err,
+				}
+			}
+
+			if pgerr.Code == pgerrcode.CheckViolation &&
+				pgerr.ConstraintName == "secrets_value_validation" {
+
+				return &store.StoreError{
+					Code:         store.ErrorCode_InvalidSecretValueFormat,
+					Msg:          fmt.Sprintf("secret value '%s' format is not correct. hint: %s", args.Value, invalidSecretValueFormatHint),
+					WrappedError: err,
+				}
+			}
+
+			if pgerr.Code == pgerrcode.InvalidTextRepresentation &&
+				strings.HasPrefix(pgerr.Message, "invalid input value for enum secret_scopes:") {
+
+				return &store.StoreError{
+					Code:         store.ErrorCode_InvalidSecretScope,
+					Msg:          fmt.Sprintf("secret scope '%s' value is invalid, hint: %s", args.Scope, invalidSecretScopeFormatHint),
+					WrappedError: err,
+				}
+			}
 		}
-	}
-
-	if !cmd.Insert() {
 
 		return &store.StoreError{
 			Code:         store.ErrorCode_Unknown,
@@ -44,14 +73,14 @@ func (st PostgresStore) CreateSecret(ctx context.Context, args store.CreateSecre
 func (st PostgresStore) GetSecret(ctx context.Context, key store.SecretKey) (*store.Secret, *store.StoreError) {
 
 	const query = `
-		select key, scope, pass
+		select id, scope, value
 		from secrets
-		where key = $1 and scope = $2
+		where id = $1 and scope = $2
 	`
 
 	var secret store.Secret
 	var row = st.Pool.QueryRow(ctx, query, key.ID, key.Scope)
-	var err = row.Scan(&secret.ID, &secret.Scope, &secret.Pass)
+	var err = row.Scan(&secret.ID, &secret.Scope, &secret.Value)
 
 	if err != nil {
 
@@ -84,32 +113,28 @@ func (st PostgresStore) UpdateSecret(ctx context.Context, key store.SecretKey, a
 
 	if args.ID.IsSome() {
 
-		if len(queryArgs) > 3 {
-			queryBuilder.WriteString(" ,")
-		}
-
-		queryBuilder.WriteString(fmt.Sprintf(" id = $%d", len(queryArgs)))
-		queryArgs = append(queryArgs, args.ID)
+		queryBuilder.WriteString(" id = $3")
+		queryArgs = append(queryArgs, args.ID.MustGet())
 	}
 
 	if args.Scope.IsSome() {
 
-		if len(queryArgs) > 3 {
-			queryBuilder.WriteString(" ,")
+		if len(queryArgs) > 2 {
+			queryBuilder.WriteString(",")
 		}
 
-		queryBuilder.WriteString(fmt.Sprintf(" scope = $%d", len(queryArgs)))
-		queryArgs = append(queryArgs, args.Scope)
+		queryBuilder.WriteString(fmt.Sprintf(" scope = $%d", len(queryArgs)+1))
+		queryArgs = append(queryArgs, args.Scope.MustGet())
 	}
 
-	if args.Pass.IsSome() {
+	if args.Value.IsSome() {
 
-		if len(queryArgs) > 3 {
-			queryBuilder.WriteString(" ,")
+		if len(queryArgs) > 2 {
+			queryBuilder.WriteString(",")
 		}
 
-		queryBuilder.WriteString(fmt.Sprintf(" pass = $%d", len(queryArgs)))
-		queryArgs = append(queryArgs, args.Pass)
+		queryBuilder.WriteString(fmt.Sprintf(" value = $%d", len(queryArgs)+1))
+		queryArgs = append(queryArgs, args.Value.MustGet())
 	}
 
 	// There are no updates, the 2 args are id and scope
@@ -123,6 +148,40 @@ func (st PostgresStore) UpdateSecret(ctx context.Context, key store.SecretKey, a
 	var err error
 	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
+		var pgerr *pgconn.PgError
+		if errors.As(err, &pgerr) {
+
+			if pgerr.Code == pgerrcode.CheckViolation &&
+				pgerr.ConstraintName == "secrets_id_validation" {
+
+				return &store.StoreError{
+					Code:         store.ErrorCode_InvalidSecretIDFormat,
+					Msg:          fmt.Sprintf("secret id '%s' format is not correct. hint: %s", args.ID, invalidSecretIDFormatHint),
+					WrappedError: err,
+				}
+			}
+
+			if pgerr.Code == pgerrcode.CheckViolation &&
+				pgerr.ConstraintName == "secrets_value_validation" {
+
+				return &store.StoreError{
+					Code:         store.ErrorCode_InvalidSecretValueFormat,
+					Msg:          fmt.Sprintf("secret value '%s' format is not correct. hint: %s", args.Value, invalidSecretValueFormatHint),
+					WrappedError: err,
+				}
+			}
+
+			if pgerr.Code == pgerrcode.InvalidTextRepresentation &&
+				strings.HasPrefix(pgerr.Message, "invalid input value for enum secret_scopes:") {
+
+				return &store.StoreError{
+					Code:         store.ErrorCode_InvalidSecretScope,
+					Msg:          fmt.Sprintf("secret scope '%s' value is invalid, hint: %s", args.Scope, invalidSecretScopeFormatHint),
+					WrappedError: err,
+				}
+			}
+		}
+
 		return &store.StoreError{
 			Code:         store.ErrorCode_Unknown,
 			Msg:          "unknown error",
@@ -130,7 +189,7 @@ func (st PostgresStore) UpdateSecret(ctx context.Context, key store.SecretKey, a
 		}
 	}
 
-	if !cmd.Update() {
+	if cmd.RowsAffected() == 0 {
 
 		return &store.StoreError{
 			Code:         store.ErrorCode_SecretNotFound,
@@ -146,7 +205,7 @@ func (st PostgresStore) DeleteSecret(ctx context.Context, key store.SecretKey) *
 
 	const query = `
 		delete from secrets
-		where key = $1 and scope = $2
+		where id = $1 and scope = $2
 	`
 
 	var cmd pgconn.CommandTag
@@ -160,7 +219,7 @@ func (st PostgresStore) DeleteSecret(ctx context.Context, key store.SecretKey) *
 		}
 	}
 
-	if !cmd.Delete() {
+	if cmd.RowsAffected() == 0 {
 
 		return &store.StoreError{
 			Code:         store.ErrorCode_SecretNotFound,

@@ -129,7 +129,7 @@ func Login(c *gin.Context) {
 	}
 
 	err = bcrypt.CompareHashAndPassword(
-		[]byte(secret.Pass), []byte(body.Password))
+		[]byte(secret.Value), []byte(body.Password))
 
 	if err != nil {
 

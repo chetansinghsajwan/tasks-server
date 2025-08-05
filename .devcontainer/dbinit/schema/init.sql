@@ -68,16 +68,16 @@ begin
     );
 
     create table secrets (
-        key           text not null,
+        id            text not null,
         scope         secret_scopes not null,
         value         text not null,
 
-        primary key (key, scope),
+        primary key (id, scope),
 
-        constraint secrets_key_validation check (
+        constraint secrets_id_validation check (
 
             -- ensure no empty whitespace characters
-            length(trim(key)) != 0
+            length(trim(id)) != 0
         ),
 
         constraint secrets_value_validation check (

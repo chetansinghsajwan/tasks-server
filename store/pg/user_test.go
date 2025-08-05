@@ -33,5 +33,6 @@ func TestPostgresUserStore(t *testing.T) {
 	// Setup stores
 	var st store.Store = pg.PostgresStore{Pool: pool}
 
+	// Perform the test
 	test.TestUserStore(t, st)
 }

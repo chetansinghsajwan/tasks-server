@@ -12,17 +12,17 @@ type SecretKey struct {
 type Secret struct {
 	ID    string
 	Scope string
-	Pass  string
+	Value string
 }
 
 type CreateSecretParams struct {
 	ID    string
 	Scope string
-	Pass  string
+	Value string
 }
 
 type UpdateSecretParams struct {
 	ID    option.Option[string]
 	Scope option.Option[string]
-	Pass  option.Option[string]
+	Value option.Option[string]
 }

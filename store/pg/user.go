@@ -13,10 +13,10 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-const userIdFormatHint string = ""
-const userEmailFormatHint string = ""
-const userFullNameFormatHint string = ""
-const userDisplayNameFormatHint string = ""
+const invalidUserIDFormatHint string = ""
+const invalidUserEmailFormatHint string = ""
+const invalidUserFullNameFormatHint string = ""
+const invalidUserDisplayNameFormatHint string = ""
 
 func (st PostgresStore) GetUser(ctx context.Context, id store.UserID) (*store.User, *store.StoreError) {
 
@@ -132,7 +132,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserIDFormat,
-					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", args.ID, userIdFormatHint),
+					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", args.ID, invalidUserIDFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -160,7 +160,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserEmailFormat,
-					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", args.Email, userEmailFormatHint),
+					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", args.Email, invalidUserEmailFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -178,7 +178,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserFullNameFormat,
-					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", args.FullName, userFullNameFormatHint),
+					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", args.FullName, invalidUserFullNameFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -187,7 +187,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserDisplayNameFormat,
-					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.DisplayName, userDisplayNameFormatHint),
+					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.DisplayName, invalidUserDisplayNameFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -278,7 +278,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserIDFormat,
-					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", args.ID, userIdFormatHint),
+					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", args.ID, invalidUserIDFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -306,7 +306,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserEmailFormat,
-					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", args.Email, userEmailFormatHint),
+					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", args.Email, invalidUserEmailFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -324,7 +324,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserFullNameFormat,
-					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", args.FullName, userFullNameFormatHint),
+					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", args.FullName, invalidUserFullNameFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -333,7 +333,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserDisplayNameFormat,
-					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.DisplayName, userDisplayNameFormatHint),
+					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.DisplayName, invalidUserDisplayNameFormatHint),
 					WrappedError: err,
 				}
 			}

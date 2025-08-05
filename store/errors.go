@@ -40,6 +40,9 @@ const (
 
 	// Secret related errors
 	ErrorCode_SecretNotFound
+	ErrorCode_InvalidSecretIDFormat
+	ErrorCode_InvalidSecretScope
+	ErrorCode_InvalidSecretValueFormat
 )
 
 type StoreError struct {
