@@ -21,22 +21,45 @@ begin
         display_name  text,
 
         constraint users_id_validation check (
-            length(trim(id)) != 0 and
-            id ~ '^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$' and
-            id !~ '--+'
+
+            -- ensure no empty whitespace value
+            length(trim(id)) != 0
+
+            -- ensure lowercase alphanumeric and hyphen only and between 2 to 30 in length
+            and id ~ '^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$'
+
+            -- ensure no multiple hyphens together
+            and id !~ '--+'
         ),
 
         constraint users_email_validation check (
-            length(trim(email)) != 0 and
-            email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+
+            -- ensure no empty whitespace value
+            length(trim(email)) != 0
+
+            -- ensure valid email format with lowercase alphanumeric chars and some symbols only
+            and email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
         ),
 
         constraint users_full_name_validation check (
+
+            -- ensure no empty whitespace value
             length(trim(full_name)) != 0
+
+            -- ensure no leading and trailing spaces
+            and full_name = btrim(full_name)
         ),
 
         constraint users_display_name_validation check (
-            display_name is null or length(trim(display_name)) != 0
+
+            display_name is null or (
+
+                -- ensure no empty whitespace value
+                length(trim(display_name)) != 0
+
+                -- ensure no leading and trailing spaces
+                and display_name = btrim(display_name)
+            )
         )
     );
 
@@ -52,10 +75,14 @@ begin
         primary key (key, scope),
 
         constraint secrets_key_validation check (
+
+            -- ensure no empty whitespace characters
             length(trim(key)) != 0
         ),
 
         constraint secrets_value_validation check (
+
+            -- ensure no empty whitespace characters
             length(trim(value)) != 0
         )
     );
@@ -66,6 +93,8 @@ begin
         owner_id     user_id_type not null references users(id),
 
         constraint lists_name_validation check (
+
+            -- ensure no empty whitespace characters
             length(trim(name)) != 0
         )
     );
@@ -81,6 +110,8 @@ begin
         labels       text[],
 
         constraint tasks_title_validation check (
+
+            -- ensure no empty whitespace characters
             length(trim(title)) != 0
         ),
 
