@@ -10,10 +10,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const User1_ID = "username"
-const User1_Email = "myemail@domain.com"
-const User1_FullName = "First Middle Last"
-const User1_DisplayName = "First"
+var User0_ID, _ = store.ParseUserID("user0")
+var User0_Email = "user0@domain.com"
+var User0_FullName = "First0 Middle0 Last0"
+var User0_DisplayName = "First0"
+
+var User1_ID, _ = store.ParseUserID("user1")
+var User1_Email = "user1@domain.com"
+var User1_FullName = "First1 Middle1 Last1"
+var User1_DisplayName = "First1"
 
 func TestCreateUser(t *testing.T) {
 
@@ -38,132 +43,165 @@ func TestCreateUser(t *testing.T) {
 	// Setup stores
 	var us = pg.PostgresStore{Pool: pool}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid id
+	// ---------------------------------------------------------------------------------------------
+
 	var serr *store.StoreError
 	serr = us.CreateUser(ctx, store.CreateUserParams{
 		ID:          "",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid id
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
 		ID:          "   ",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid id
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
 		ID:          "-username",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid id
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username-",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid id
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
 		ID:          "user--name",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid id
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
 		ID:          " username",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid id
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username ",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid full name
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
-		ID:          "username1",
-		Email:       User1_Email,
+		ID:          "username0",
+		Email:       User0_Email,
 		FullName:    "  ",
-		DisplayName: option.Some(User1_DisplayName),
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserFullNameFormat {
 		t.Fatalf("Expected store.ErrUserFullNameFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid full name
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
-		ID:          "username1",
-		Email:       User1_Email,
-		FullName:    User1_FullName + " ",
-		DisplayName: option.Some(User1_DisplayName),
+		ID:          "username0",
+		Email:       User0_Email,
+		FullName:    User0_FullName + " ",
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserFullNameFormat {
 		t.Fatalf("Expected store.ErrUserFullNameFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid full name
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
-		ID:          "username1",
-		Email:       User1_Email,
-		FullName:    " " + User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		ID:          "username0",
+		Email:       User0_Email,
+		FullName:    " " + User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserFullNameFormat {
 		t.Fatalf("Expected store.ErrUserFullNameFormatCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid display name
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
-		ID:          "username1",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
+		ID:          "username0",
+		Email:       User0_Email,
+		FullName:    User0_FullName,
 		DisplayName: option.Some(" "),
 	})
 
@@ -171,89 +209,167 @@ func TestCreateUser(t *testing.T) {
 		t.Fatalf("Expected store.ErrorCode_UserDisplayNameFormat error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid display name
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
-		ID:          "username1",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName + " "),
+		ID:          "username0",
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName + " "),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserDisplayNameFormat {
 		t.Fatalf("Expected store.ErrorCode_UserDisplayNameFormat error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid display name
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
-		ID:          "username1",
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(" " + User1_DisplayName),
+		ID:          "username0",
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(" " + User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserDisplayNameFormat {
 		t.Fatalf("Expected store.ErrorCode_UserDisplayNameFormat error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
-		ID:          User1_ID,
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		ID:          User0_ID,
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr != nil {
 		t.Fatalf("Expected nil err, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test get user that doesn't exist
+	// ---------------------------------------------------------------------------------------------
+
 	_, serr = us.GetUser(ctx, "usernamenotexists")
 
 	if serr == nil || serr.Code != store.ErrorCode_UserNotFound {
 		t.Fatalf("Expected store.ErrorCode_UserNotFound error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test create user with same id again
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.CreateUser(ctx, store.CreateUserParams{
-		ID:          User1_ID,
-		Email:       User1_Email,
-		FullName:    User1_FullName,
-		DisplayName: option.Some(User1_DisplayName),
+		ID:          User0_ID,
+		Email:       User0_Email,
+		FullName:    User0_FullName,
+		DisplayName: option.Some(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != store.ErrorCode_UserIDAlreadyExists {
 		t.Fatalf("Expected store.ErrUserIDAlreadyExistsCode error, got: %v", serr)
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test get user
+	// ---------------------------------------------------------------------------------------------
+
 	var user *store.User
+	user, serr = us.GetUser(ctx, User0_ID)
+
+	if serr != nil {
+		t.Fatalf("Expected nil err, got: %v", serr)
+	}
+
+	if user.Email != User0_Email {
+		t.Fatalf("Expected user.email '%s', got: %s", User0_Email, user.Email)
+	}
+
+	if user.FullName != User0_FullName {
+		t.Fatalf("Expected user.email '%s', got: %s", User0_FullName, user.FullName)
+	}
+
+	if user.DisplayName.MustGet() != User0_DisplayName {
+		t.Fatalf("Expected user.email '%s', got: %s", User0_DisplayName, user.DisplayName.MustGet())
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Update user with invalid FullName
+	// ---------------------------------------------------------------------------------------------
+
+	var fullName = " "
+	serr = us.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
+		FullName: option.Some(&fullName),
+	})
+
+	if serr == nil || serr.Code != store.ErrorCode_UserFullNameFormat {
+		t.Fatalf("Expected store.ErrorCode_UserFullNameFormat error, got: %v", serr)
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Update user
+	// ---------------------------------------------------------------------------------------------
+
+	serr = us.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
+		ID:          option.Some(&User1_ID),
+		Email:       option.Some(&User1_Email),
+		FullName:    option.Some(&User1_FullName),
+		DisplayName: option.Some(&User1_DisplayName),
+	})
+
+	if serr != nil {
+		t.Fatalf("Expected nil error, got: %v", serr.WrappedError.Error())
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// Check if the user values are correct
+	// ---------------------------------------------------------------------------------------------
+
 	user, serr = us.GetUser(ctx, User1_ID)
 
 	if serr != nil {
 		t.Fatalf("Expected nil err, got: %v", serr)
 	}
 
+	if user.ID != User1_ID {
+		t.Fatalf("Expected User.ID '%s', got: '%s'", User1_ID, user.ID)
+	}
+
 	if user.Email != User1_Email {
-		t.Fatalf("Expected user.email '%s', got: %s", User1_Email, user.Email)
+		t.Fatalf("Expected User.Email '%s', got: '%s'", User1_Email, user.Email)
 	}
 
 	if user.FullName != User1_FullName {
-		t.Fatalf("Expected user.email '%s', got: %s", User1_FullName, user.FullName)
+		t.Fatalf("Expected User.FullName '%s', got: '%s'", User1_FullName, user.FullName)
 	}
 
 	if user.DisplayName.MustGet() != User1_DisplayName {
-		t.Fatalf("Expected user.email '%s', got: %s", User1_DisplayName, user.DisplayName.MustGet())
+		t.Fatalf("Expected User.DisplayName '%s', got: '%s'", User1_DisplayName, user.DisplayName.MustGet())
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test delete user
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.DeleteUser(ctx, User1_ID)
 
 	if serr != nil {
 		t.Fatalf("Expected nil err, got: %v", serr.WrappedError.Error())
 	}
 
+	// ---------------------------------------------------------------------------------------------
 	// Test delete user that doesn't exist
+	// ---------------------------------------------------------------------------------------------
+
 	serr = us.DeleteUser(ctx, User1_ID)
 
 	if serr == nil || serr.Code != store.ErrorCode_UserNotFound {
