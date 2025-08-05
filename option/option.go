@@ -57,10 +57,21 @@ func (o Option[T]) Ptr() *T {
 
 // String implements fmt.Stringer
 func (o Option[T]) String() string {
+
 	if o.IsSome() {
-		return fmt.Sprintf("Some(%v)", o.value)
+		return fmt.Sprintf("%v", o.value)
 	}
-	return "None"
+
+	return ""
+}
+
+func (o Option[T]) Value() (driver.Value, error) {
+
+	if !o.isSome {
+		return nil, nil
+	}
+
+	return fmt.Sprintf("%v", o.value), nil
 }
 
 // Scan implements the sql.Scanner interface (pgx supports this).

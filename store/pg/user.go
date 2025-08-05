@@ -169,7 +169,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserEmailAlreadyExists,
-					Msg:          fmt.Sprintf("user email '%s' already exis", args.Email),
+					Msg:          fmt.Sprintf("user email '%s' already exists", args.Email),
 					WrappedError: err,
 				}
 			}
@@ -187,7 +187,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserDisplayNameFormat,
-					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.FullName, userDisplayNameFormatHint),
+					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.DisplayName, userDisplayNameFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -298,7 +298,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserEmailAlreadyExists,
-					Msg:          fmt.Sprintf("user email '%s' already exis", args.Email),
+					Msg:          fmt.Sprintf("user email '%s' already exists", args.Email),
 					WrappedError: err,
 				}
 			}
@@ -316,7 +316,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 
 				return &store.StoreError{
 					Code:         store.ErrorCode_UserDisplayNameFormat,
-					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.FullName, userDisplayNameFormatHint),
+					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.DisplayName, userDisplayNameFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -329,7 +329,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 		}
 	}
 
-	if !cmd.Update() {
+	if cmd.RowsAffected() == 0 {
 
 		return &store.StoreError{
 			Code: store.ErrorCode_UserNotFound,
@@ -344,7 +344,7 @@ func (st PostgresStore) DeleteUser(ctx context.Context, id store.UserID) *store.
 
 	const query = `
 		DELETE FROM users
-		WHERE id = $0
+		WHERE id = $1
 	`
 
 	var cmd pgconn.CommandTag
@@ -360,7 +360,7 @@ func (st PostgresStore) DeleteUser(ctx context.Context, id store.UserID) *store.
 		}
 	}
 
-	if !cmd.Delete() {
+	if cmd.RowsAffected() == 0 {
 
 		return &store.StoreError{
 			Code: store.ErrorCode_UserNotFound,

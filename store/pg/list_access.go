@@ -30,7 +30,7 @@ func (st PostgresStore) AddListAccess(ctx context.Context, args store.AddListAcc
 			queryBuilder.WriteString(", ")
 		}
 
-		queryBuilder.WriteString(fmt.Sprintf("($1, $2, $%s)", i+3))
+		queryBuilder.WriteString(fmt.Sprintf("($1, $2, $%d)", i+3))
 		queryArgs = append(queryArgs, access)
 	}
 
@@ -138,7 +138,7 @@ func (st PostgresStore) RemoveListAccess(ctx context.Context, args store.RemoveL
 			queryBuilder.WriteString(", ")
 		}
 
-		queryBuilder.WriteString(fmt.Sprintf("list_id = $%s", len(queryArgs)+1))
+		queryBuilder.WriteString(fmt.Sprintf("list_id = $%d", len(queryArgs)+1))
 		queryArgs = append(queryArgs, args.ListID.MustGet())
 	}
 
@@ -148,7 +148,7 @@ func (st PostgresStore) RemoveListAccess(ctx context.Context, args store.RemoveL
 			queryBuilder.WriteString(", ")
 		}
 
-		queryBuilder.WriteString(fmt.Sprintf("access = any($%s::list_access_type[])", len(queryArgs)+1))
+		queryBuilder.WriteString(fmt.Sprintf("access = any($%d::list_access_type[])", len(queryArgs)+1))
 		queryArgs = append(queryArgs, args.Access.MustGet())
 	}
 
