@@ -20,7 +20,7 @@ var User1_Email = "user1@domain.com"
 var User1_FullName = "First1 Middle1 Last1"
 var User1_DisplayName = "First1"
 
-func TestCreateUser(t *testing.T) {
+func TestPostgresUserStore(t *testing.T) {
 
 	var ctx = context.Background()
 	var connString = "postgres://devuser:devpass@database:5432/testdb?sslmode=disable"
@@ -41,14 +41,14 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	// Setup stores
-	var us = pg.PostgresStore{Pool: pool}
+	var st store.Store = pg.PostgresStore{Pool: pool}
 
 	// ---------------------------------------------------------------------------------------------
 	// Test create user with invalid id
 	// ---------------------------------------------------------------------------------------------
 
 	var serr *store.StoreError
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -63,7 +63,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid id
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "   ",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -78,7 +78,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid id
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "-username",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -93,7 +93,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid id
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username-",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -108,7 +108,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid id
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "user--name",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -123,7 +123,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid id
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          " username",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -138,7 +138,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid id
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username ",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -153,7 +153,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid full name
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    "  ",
@@ -168,7 +168,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid full name
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    User0_FullName + " ",
@@ -183,7 +183,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid full name
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    " " + User0_FullName,
@@ -198,7 +198,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid display name
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -213,7 +213,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid display name
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -228,7 +228,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with invalid display name
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -243,7 +243,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          User0_ID,
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -258,7 +258,7 @@ func TestCreateUser(t *testing.T) {
 	// Test get user that doesn't exist
 	// ---------------------------------------------------------------------------------------------
 
-	_, serr = us.GetUser(ctx, "usernamenotexists")
+	_, serr = st.GetUser(ctx, "usernamenotexists")
 
 	if serr == nil || serr.Code != store.ErrorCode_UserNotFound {
 		t.Fatalf("Expected store.ErrorCode_UserNotFound error, got: %v", serr)
@@ -268,7 +268,7 @@ func TestCreateUser(t *testing.T) {
 	// Test create user with same id again
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.CreateUser(ctx, store.CreateUserParams{
+	serr = st.CreateUser(ctx, store.CreateUserParams{
 		ID:          User0_ID,
 		Email:       User0_Email,
 		FullName:    User0_FullName,
@@ -284,7 +284,7 @@ func TestCreateUser(t *testing.T) {
 	// ---------------------------------------------------------------------------------------------
 
 	var user *store.User
-	user, serr = us.GetUser(ctx, User0_ID)
+	user, serr = st.GetUser(ctx, User0_ID)
 
 	if serr != nil {
 		t.Fatalf("Expected nil err, got: %v", serr)
@@ -307,7 +307,7 @@ func TestCreateUser(t *testing.T) {
 	// ---------------------------------------------------------------------------------------------
 
 	var fullName = " "
-	serr = us.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
+	serr = st.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
 		FullName: option.Some(&fullName),
 	})
 
@@ -319,7 +319,7 @@ func TestCreateUser(t *testing.T) {
 	// Update user
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
+	serr = st.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
 		ID:          option.Some(&User1_ID),
 		Email:       option.Some(&User1_Email),
 		FullName:    option.Some(&User1_FullName),
@@ -334,7 +334,7 @@ func TestCreateUser(t *testing.T) {
 	// Check if the user values are correct
 	// ---------------------------------------------------------------------------------------------
 
-	user, serr = us.GetUser(ctx, User1_ID)
+	user, serr = st.GetUser(ctx, User1_ID)
 
 	if serr != nil {
 		t.Fatalf("Expected nil err, got: %v", serr)
@@ -360,7 +360,7 @@ func TestCreateUser(t *testing.T) {
 	// Test delete user
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.DeleteUser(ctx, User1_ID)
+	serr = st.DeleteUser(ctx, User1_ID)
 
 	if serr != nil {
 		t.Fatalf("Expected nil err, got: %v", serr.WrappedError.Error())
@@ -370,7 +370,7 @@ func TestCreateUser(t *testing.T) {
 	// Test delete user that doesn't exist
 	// ---------------------------------------------------------------------------------------------
 
-	serr = us.DeleteUser(ctx, User1_ID)
+	serr = st.DeleteUser(ctx, User1_ID)
 
 	if serr == nil || serr.Code != store.ErrorCode_UserNotFound {
 		t.Fatalf("Expected store.ErrorCode_UserNotFound error, got: %v", serr)
