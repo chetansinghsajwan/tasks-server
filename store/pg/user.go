@@ -215,32 +215,49 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 
 	// Build the query
 	var queryBuilder strings.Builder
-	queryBuilder.WriteString("UPDATE users SET ")
+	queryBuilder.WriteString("update users set")
 
 	// $1 is set for 'id'
-	var argIndex = 2
 	var queryArgs = []any{id}
 
+	if args.ID.IsSome() {
+
+		queryBuilder.WriteString(" id = $2")
+		queryArgs = append(queryArgs, args.ID.MustGet())
+	}
+
 	if args.Email.IsSome() {
-		queryBuilder.WriteString(fmt.Sprintf("email = %d", argIndex))
-		queryArgs = append(queryArgs, args.Email)
-		argIndex += 1
+
+		if len(queryArgs) > 1 {
+			queryBuilder.WriteString(", ")
+		}
+
+		queryBuilder.WriteString(fmt.Sprintf(" email = $%d", len(queryArgs)+1))
+		queryArgs = append(queryArgs, args.Email.MustGet())
 	}
 
 	if args.FullName.IsSome() {
-		queryBuilder.WriteString(fmt.Sprintf("full_name = %d", argIndex))
-		queryArgs = append(queryArgs, args.FullName)
-		argIndex += 1
+
+		if len(queryArgs) > 1 {
+			queryBuilder.WriteString(", ")
+		}
+
+		queryBuilder.WriteString(fmt.Sprintf(" full_name = $%d", len(queryArgs)+1))
+		queryArgs = append(queryArgs, args.FullName.MustGet())
 	}
 
 	if args.DisplayName.IsSome() {
-		queryBuilder.WriteString(fmt.Sprintf("display_name = %d", argIndex))
-		queryArgs = append(queryArgs, args.DisplayName)
-		argIndex += 1
+
+		if len(queryArgs) > 1 {
+			queryBuilder.WriteString(", ")
+		}
+
+		queryBuilder.WriteString(fmt.Sprintf(" display_name = $%d", len(queryArgs)+1))
+		queryArgs = append(queryArgs, args.DisplayName.MustGet())
 	}
 
 	// There were no updates
-	if argIndex == 2 {
+	if len(queryArgs) == 1 {
 		return nil
 	}
 
