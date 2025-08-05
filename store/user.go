@@ -9,24 +9,24 @@ import (
 type UserID string
 
 type User struct {
-	ID          string        `json:"id"`
-	FullName    string        `json:"full_name"`
-	DisplayName option.String `json:"display_name"`
-	Email       string        `json:"email"`
+	ID          string                `json:"id"`
+	FullName    string                `json:"full_name"`
+	DisplayName option.Option[string] `json:"display_name"`
+	Email       string                `json:"email"`
 }
 
 type CreateUserParams struct {
 	ID          string
 	FullName    string
-	DisplayName option.String
+	DisplayName option.Option[string]
 	Email       string
 }
 
 type UpdateUserParams struct {
-	ID          option.StringPtr
-	Email       option.StringPtr
-	FullName    option.StringPtr
-	DisplayName option.StringPtr
+	ID          option.Option[*string]
+	Email       option.Option[*string]
+	FullName    option.Option[*string]
+	DisplayName option.Option[*string]
 }
 
 func NullUserID() UserID {

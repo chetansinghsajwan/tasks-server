@@ -111,7 +111,3 @@ func (o *Option[T]) Scan(src any) error {
 
 	return fmt.Errorf("option.Scan: unsupported type for Option[%T]: %T", o.value, src)
 }
-
-// String helpers
-type String = Option[string]
-type StringPtr = Option[*string]
