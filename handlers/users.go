@@ -23,19 +23,19 @@ const (
 var ST store.Store
 
 type CreateUserBody struct {
-	ID          string  `json:"id"`
-	Pass        string  `json:"pass"`
-	FullName    string  `json:"full_name"`
-	DisplayName *string `json:"display_name"`
-	Email       string  `json:"email"`
+	ID          store.UserID `json:"id"`
+	Pass        string       `json:"pass"`
+	FullName    string       `json:"full_name"`
+	DisplayName *string      `json:"display_name"`
+	Email       string       `json:"email"`
 }
 
 type UpdateUserBody struct {
-	ID          *string `json:"id"`
-	Pass        *string `json:"pass"`
-	FullName    *string `json:"full_name"`
-	DisplayName *string `json:"display_name"`
-	Email       *string `json:"email"`
+	ID          *store.UserID `json:"id"`
+	Pass        *string       `json:"pass"`
+	FullName    *string       `json:"full_name"`
+	DisplayName *string       `json:"display_name"`
+	Email       *string       `json:"email"`
 }
 
 func CreateUser(c *gin.Context) {

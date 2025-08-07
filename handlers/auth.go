@@ -92,8 +92,8 @@ func AuthenticateMiddleware(c *gin.Context) {
 }
 
 type LoginRequest struct {
-	UserID   string `json:"user_id"`
-	Password string `json:"password"`
+	UserID   store.UserID `json:"user_id"`
+	Password string       `json:"password"`
 }
 
 func Login(c *gin.Context) {
@@ -114,11 +114,8 @@ func Login(c *gin.Context) {
 	}
 
 	var serr *store.StoreError
-	var secret *store.Secret
-	secret, serr = ST.GetSecret(ctx, store.SecretKey{
-		ID:    body.UserID,
-		Scope: "user-login",
-	})
+	var secret *store.UserSecret
+	secret, serr = ST.GetUserSecret(ctx, body.UserID)
 
 	if serr != nil {
 
@@ -129,7 +126,7 @@ func Login(c *gin.Context) {
 	}
 
 	err = bcrypt.CompareHashAndPassword(
-		[]byte(secret.Value), []byte(body.Password))
+		[]byte(secret.Pass), []byte(body.Password))
 
 	if err != nil {
 
@@ -140,7 +137,7 @@ func Login(c *gin.Context) {
 	}
 
 	var token string
-	if token, err = GenerateToken(body.UserID); err != nil {
+	if token, err = GenerateToken(body.UserID.String()); err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

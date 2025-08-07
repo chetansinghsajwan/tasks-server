@@ -39,10 +39,10 @@ const (
 	ErrorCode_TaskNotFoundCode
 
 	// Secret related errors
-	ErrorCode_SecretNotFound
+	ErrorCode_UserSecretNotFound
 	ErrorCode_InvalidSecretIDFormat
 	ErrorCode_InvalidSecretScope
-	ErrorCode_InvalidSecretValueFormat
+	ErrorCode_InvalidUserSecretPassFormat
 )
 
 type StoreError struct {

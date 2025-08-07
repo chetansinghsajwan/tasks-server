@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func TestSecretStore(t *testing.T) {
+func TestPostgresUserSecretStore(t *testing.T) {
 
 	var ctx = context.Background()
 	var connString = "postgres://devuser:devpass@database:5432/testdb?sslmode=disable"
@@ -34,5 +34,5 @@ func TestSecretStore(t *testing.T) {
 	var st store.Store = pg.PostgresStore{Pool: pool}
 
 	// Perform the test
-	test.TestSecretStore(t, st)
+	test.TestUserSecretStore(t, st)
 }

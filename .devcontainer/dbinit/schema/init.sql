@@ -4,9 +4,8 @@ begin
     drop table if exists list_access;
     drop table if exists tasks;
     drop table if exists lists;
-    drop table if exists secrets;
     drop table if exists users;
-    drop type if exists secret_scopes;
+    drop table if exists user_secrets;
     drop type if exists list_access_type;
     drop type if exists user_id_type;
     drop type if exists list_name_type;
@@ -63,26 +62,16 @@ begin
         )
     );
 
-    create type secret_scopes as enum (
-        'user-login'
-    );
+    create table user_secrets (
+        id          user_id_type not null,
+        value       text not null,
 
-    create table secrets (
-        id            text not null,
-        scope         secret_scopes not null,
-        value         text not null,
+        constraint user_secrets_pk primary key (id),
 
-        primary key (id, scope),
+        constraint user_secrets_id_fk foreign key (id)
+            references users(id) on delete cascade,
 
-        constraint secrets_id_validation check (
-
-            -- ensure no empty whitespace characters
-            length(trim(id)) != 0
-        ),
-
-        constraint secrets_value_validation check (
-
-            -- ensure no empty whitespace characters
+        constraint user_secrets_value_format_check check (
             length(trim(value)) != 0
         )
     );
