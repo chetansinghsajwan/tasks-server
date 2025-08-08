@@ -18,7 +18,7 @@ const (
 )
 
 type CreateTaskRequest struct {
-	ListID      store.ListID             `json:"list_id"`
+	ListID      uint64                   `json:"list_id"`
 	Title       string                   `json:"title"`
 	Description option.Option[string]    `json:"description"`
 	Priority    option.Option[uint32]    `json:"priority"`
@@ -28,13 +28,13 @@ type CreateTaskRequest struct {
 }
 
 type UpdateTaskRequest struct {
-	ListID      option.Option[*store.ListID] `json:"list_id"`
-	Title       option.Option[*string]       `json:"title"`
-	Description option.Option[*string]       `json:"description"`
-	Priority    option.Option[*uint32]       `json:"priority"`
-	DueDate     option.Option[*time.Time]    `json:"due_date"`
-	Assignee    option.Option[*string]       `json:"assignee"`
-	Labels      option.Option[[]string]      `json:"labels"`
+	ListID      option.Option[*uint64]    `json:"list_id"`
+	Title       option.Option[*string]    `json:"title"`
+	Description option.Option[*string]    `json:"description"`
+	Priority    option.Option[*uint32]    `json:"priority"`
+	DueDate     option.Option[*time.Time] `json:"due_date"`
+	Assignee    option.Option[*string]    `json:"assignee"`
+	Labels      option.Option[[]string]   `json:"labels"`
 }
 
 func CreateTask(c *gin.Context) {

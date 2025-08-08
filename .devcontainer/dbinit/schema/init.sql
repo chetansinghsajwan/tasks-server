@@ -79,7 +79,6 @@ begin
     create table lists (
         id           bigint generated always as identity primary key,
         name         list_name_type unique not null,
-        owner_id     user_id_type not null references users(id),
 
         constraint lists_name_validation check (
 

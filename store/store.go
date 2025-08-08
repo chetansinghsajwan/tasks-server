@@ -16,10 +16,10 @@ type Store interface {
 	UpdateUserSecret(ctx context.Context, id string, args UpdateUserSecretParams) *StoreError
 	DeleteUserSecret(ctx context.Context, id string) *StoreError
 
-	CreateList(ctx context.Context, args CreateListParams) (ListID, *StoreError)
-	GetList(ctx context.Context, id ListID) (*List, *StoreError)
-	UpdateList(ctx context.Context, id ListID, args UpdateListParams) *StoreError
-	DeleteList(ctx context.Context, id ListID) *StoreError
+	CreateList(ctx context.Context, args CreateListParams) (uint64, *StoreError)
+	GetList(ctx context.Context, id uint64) (*List, *StoreError)
+	UpdateList(ctx context.Context, id uint64, args UpdateListParams) *StoreError
+	DeleteList(ctx context.Context, id uint64) *StoreError
 
 	GetTask(ctx context.Context, id TaskID) (*Task, *StoreError)
 	CreateTask(ctx context.Context, args CreateTaskParams) (TaskID, *StoreError)

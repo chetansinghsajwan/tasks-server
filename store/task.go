@@ -34,7 +34,7 @@ func (id TaskID) Format(f fmt.State, verb rune) {
 
 type Task struct {
 	ID          TaskID                   `db:"id" json:"id"`
-	ListID      ListID                   `db:"list_id" json:"list_id"`
+	ListID      uint64                   `db:"list_id" json:"list_id"`
 	Title       string                   `db:"title" json:"title"`
 	Description option.Option[string]    `db:"description" json:"description"`
 	Priority    option.Option[uint32]    `db:"priority" json:"priority"`
@@ -44,7 +44,7 @@ type Task struct {
 }
 
 type CreateTaskParams struct {
-	ListID      ListID                   `db:"list_id" json:"list_id"`
+	ListID      uint64                   `db:"list_id" json:"list_id"`
 	Title       string                   `db:"title" json:"title"`
 	Description option.Option[string]    `db:"description" json:"description"`
 	Priority    option.Option[uint32]    `db:"priority" json:"priority"`
@@ -54,7 +54,7 @@ type CreateTaskParams struct {
 }
 
 type UpdateTaskParams struct {
-	ListID      option.Option[*ListID]    `db:"list_id" json:"list_id"`
+	ListID      option.Option[*uint64]    `db:"list_id" json:"list_id"`
 	Title       option.Option[*string]    `db:"title" json:"title"`
 	Description option.Option[*string]    `db:"description" json:"description"`
 	Priority    option.Option[*uint32]    `db:"priority" json:"priority"`

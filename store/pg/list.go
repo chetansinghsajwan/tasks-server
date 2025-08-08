@@ -13,7 +13,7 @@ import (
 )
 
 func (st PostgresStore) CreateList(ctx context.Context,
-	args store.CreateListParams) (store.ListID, *store.StoreError) {
+	args store.CreateListParams) (uint64, *store.StoreError) {
 
 	const query = `
 		insert into lists(name)
@@ -23,11 +23,11 @@ func (st PostgresStore) CreateList(ctx context.Context,
 
 	var row pgx.Row = st.Pool.QueryRow(ctx, query, args.Name)
 
-	var listID store.ListID
+	var listID uint64
 	var err error
 	if err = row.Scan(&listID); err != nil {
 
-		return store.NullListID(), &store.StoreError{
+		return 0, &store.StoreError{
 			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
@@ -38,7 +38,7 @@ func (st PostgresStore) CreateList(ctx context.Context,
 }
 
 func (st PostgresStore) GetList(ctx context.Context,
-	id store.ListID) (*store.List, *store.StoreError) {
+	id uint64) (*store.List, *store.StoreError) {
 
 	const query = `
 		select id, name
@@ -57,7 +57,7 @@ func (st PostgresStore) GetList(ctx context.Context,
 
 			return nil, &store.StoreError{
 				Code:         errorcodes.ListNotFound,
-				Msg:          fmt.Sprintf("list with id '%s' not found", id),
+				Msg:          fmt.Sprintf("list with id '%d' not found", id),
 				WrappedError: err,
 			}
 		}
@@ -72,7 +72,7 @@ func (st PostgresStore) GetList(ctx context.Context,
 	return &list, nil
 }
 
-func (st PostgresStore) UpdateList(ctx context.Context, id store.ListID, args store.UpdateListParams) *store.StoreError {
+func (st PostgresStore) UpdateList(ctx context.Context, id uint64, args store.UpdateListParams) *store.StoreError {
 
 	const query = `
 		update lists set
@@ -95,7 +95,7 @@ func (st PostgresStore) UpdateList(ctx context.Context, id store.ListID, args st
 
 		return &store.StoreError{
 			Code:         errorcodes.ListNotFound,
-			Msg:          fmt.Sprintf("list with id '%s' not found", id),
+			Msg:          fmt.Sprintf("list with id '%d' not found", id),
 			WrappedError: err,
 		}
 	}
@@ -104,7 +104,7 @@ func (st PostgresStore) UpdateList(ctx context.Context, id store.ListID, args st
 }
 
 func (st PostgresStore) DeleteList(ctx context.Context,
-	id store.ListID) *store.StoreError {
+	id uint64) *store.StoreError {
 
 	const query = `
 		delete from lists
@@ -126,7 +126,7 @@ func (st PostgresStore) DeleteList(ctx context.Context,
 
 		return &store.StoreError{
 			Code:         errorcodes.ListNotFound,
-			Msg:          fmt.Sprintf("list with id '%s' not found", id),
+			Msg:          fmt.Sprintf("list with id '%d' not found", id),
 			WrappedError: err,
 		}
 	}

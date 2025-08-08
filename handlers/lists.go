@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"tasks/option"
 	"tasks/store"
+	"tasks/utils"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,8 +21,8 @@ const (
 )
 
 type CreateListRequest struct {
-	ID   store.ListID `json:"id"`
-	Name string       `json:"name"`
+	ID   uint64 `json:"id"`
+	Name string `json:"name"`
 }
 
 type UpdateListRequest struct {
@@ -47,7 +48,7 @@ func CreateList(c *gin.Context) {
 	}
 
 	// Perform creation
-	var listID store.ListID
+	var listID uint64
 	var serr *store.StoreError
 	listID, serr = ST.CreateList(ctx, store.CreateListParams{
 		Name: body.Name,
@@ -76,7 +77,7 @@ func GetList(c *gin.Context) {
 	defer cancel()
 
 	// Parse list id
-	var listID, err = store.ParseListID(c.Param("id"))
+	var listID, err = utils.ParseUint64(c.Param("id"))
 	if err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -111,9 +112,9 @@ func UpdateList(c *gin.Context) {
 	defer cancel()
 
 	// Parse list id
-	var listID store.ListID
+	var listID uint64
 	var err error
-	if listID, err = store.ParseListID(c.Param("id")); err != nil {
+	if listID, err = utils.ParseUint64(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -156,9 +157,9 @@ func DeleteList(c *gin.Context) {
 	defer cancel()
 
 	// Parse list id
-	var listID store.ListID
+	var listID uint64
 	var err error
-	if listID, err = store.ParseListID(c.Param("id")); err != nil {
+	if listID, err = utils.ParseUint64(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),

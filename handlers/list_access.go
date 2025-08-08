@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"tasks/option"
 	"tasks/store"
+	"tasks/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,9 +32,9 @@ func GetListAccess(c *gin.Context) {
 	defer cancel()
 
 	// Parse list id
-	var listID store.ListID
+	var listID uint64
 	var err error
-	if listID, err = store.ParseListID(c.Param("id")); err != nil {
+	if listID, err = utils.ParseUint64(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -80,9 +81,9 @@ func AddListAccess(c *gin.Context) {
 	defer cancel()
 
 	// Parse list id
-	var listID store.ListID
+	var listID uint64
 	var err error
-	if listID, err = store.ParseListID(c.Param("id")); err != nil {
+	if listID, err = utils.ParseUint64(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -126,9 +127,9 @@ func RemoveListAccess(c *gin.Context) {
 	defer cancel()
 
 	// Parse list id
-	var listID store.ListID
+	var listID uint64
 	var err error
-	if listID, err = store.ParseListID(c.Param("id")); err != nil {
+	if listID, err = utils.ParseUint64(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
