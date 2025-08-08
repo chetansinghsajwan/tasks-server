@@ -18,24 +18,24 @@ const (
 )
 
 type ListAccess struct {
-	UserID UserID
+	UserID string
 	ListID ListID
 	Access []ListAccessType
 }
 
 type GetListAccessParams struct {
-	UserID UserID
+	UserID string
 	ListID ListID
 }
 
 type AddListAccessParams struct {
-	UserID UserID
+	UserID string
 	ListID ListID
 	Access []ListAccessType
 }
 
 type RemoveListAccessParams struct {
-	UserID option.Option[UserID]
+	UserID option.Option[string]
 	ListID option.Option[ListID]
 	Access option.Option[[]ListAccessType]
 }

@@ -39,7 +39,7 @@ type Task struct {
 	Description option.Option[string]    `db:"description" json:"description"`
 	Priority    option.Option[uint32]    `db:"priority" json:"priority"`
 	DueDate     option.Option[time.Time] `db:"due_date" json:"due_date"`
-	Assignee    option.Option[UserID]    `db:"assignee" json:"assignee"`
+	Assignee    option.Option[string]    `db:"assignee" json:"assignee"`
 	Labels      []string                 `db:"labels" json:"labels"`
 }
 
@@ -49,7 +49,7 @@ type CreateTaskParams struct {
 	Description option.Option[string]    `db:"description" json:"description"`
 	Priority    option.Option[uint32]    `db:"priority" json:"priority"`
 	DueDate     option.Option[time.Time] `db:"due_date" json:"due_date"`
-	Assignee    option.Option[UserID]    `db:"assignee" json:"assignee"`
+	Assignee    option.Option[string]    `db:"assignee" json:"assignee"`
 	Labels      []string                 `db:"labels" json:"labels"`
 }
 
@@ -59,6 +59,6 @@ type UpdateTaskParams struct {
 	Description option.Option[*string]    `db:"description" json:"description"`
 	Priority    option.Option[*uint32]    `db:"priority" json:"priority"`
 	DueDate     option.Option[*time.Time] `db:"due_date" json:"due_date"`
-	Assignee    option.Option[*UserID]    `db:"assignee" json:"assignee"`
+	Assignee    option.Option[*string]    `db:"assignee" json:"assignee"`
 	Labels      option.Option[[]string]   `db:"labels" json:"labels"`
 }

@@ -92,8 +92,8 @@ func AuthenticateMiddleware(c *gin.Context) {
 }
 
 type LoginRequest struct {
-	UserID   store.UserID `json:"user_id"`
-	Password string       `json:"password"`
+	UserID   string `json:"user_id"`
+	Password string `json:"password"`
 }
 
 func Login(c *gin.Context) {
@@ -137,7 +137,7 @@ func Login(c *gin.Context) {
 	}
 
 	var token string
-	if token, err = GenerateToken(body.UserID.String()); err != nil {
+	if token, err = GenerateToken(body.UserID); err != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

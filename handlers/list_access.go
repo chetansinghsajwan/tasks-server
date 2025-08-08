@@ -10,16 +10,16 @@ import (
 )
 
 type GetListAccessRequest struct {
-	UserID store.UserID
+	UserID string
 }
 
 type AddListAccessRequest struct {
-	UserID store.UserID
+	UserID string
 	Access []store.ListAccessType
 }
 
 type RemoveListAccessRequest struct {
-	UserID store.UserID
+	UserID string
 	Access []store.ListAccessType
 }
 

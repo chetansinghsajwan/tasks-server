@@ -18,13 +18,13 @@ const (
 )
 
 type CreateTaskRequest struct {
-	ListID      store.ListID                `json:"list_id"`
-	Title       string                      `json:"title"`
-	Description option.Option[string]       `json:"description"`
-	Priority    option.Option[uint32]       `json:"priority"`
-	DueDate     option.Option[time.Time]    `json:"due_date"`
-	Assignee    option.Option[store.UserID] `json:"assignee"`
-	Labels      []string                    `json:"labels"`
+	ListID      store.ListID             `json:"list_id"`
+	Title       string                   `json:"title"`
+	Description option.Option[string]    `json:"description"`
+	Priority    option.Option[uint32]    `json:"priority"`
+	DueDate     option.Option[time.Time] `json:"due_date"`
+	Assignee    option.Option[string]    `json:"assignee"`
+	Labels      []string                 `json:"labels"`
 }
 
 type UpdateTaskRequest struct {
@@ -33,7 +33,7 @@ type UpdateTaskRequest struct {
 	Description option.Option[*string]       `json:"description"`
 	Priority    option.Option[*uint32]       `json:"priority"`
 	DueDate     option.Option[*time.Time]    `json:"due_date"`
-	Assignee    option.Option[*store.UserID] `json:"assignee"`
+	Assignee    option.Option[*string]       `json:"assignee"`
 	Labels      option.Option[[]string]      `json:"labels"`
 }
 

@@ -19,7 +19,7 @@ const invalidUserEmailFormatHint string = ""
 const invalidUserFullNameFormatHint string = ""
 const invalidUserDisplayNameFormatHint string = ""
 
-func (st PostgresStore) GetUser(ctx context.Context, id store.UserID) (*store.User, *store.StoreError) {
+func (st PostgresStore) GetUser(ctx context.Context, id string) (*store.User, *store.StoreError) {
 
 	const query = `
 		SELECT id, email, full_name, display_name
@@ -212,7 +212,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 	return nil
 }
 
-func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args store.UpdateUserParams) *store.StoreError {
+func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.UpdateUserParams) *store.StoreError {
 
 	// Build the query
 	var queryBuilder strings.Builder
@@ -358,7 +358,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id store.UserID, args st
 	return nil
 }
 
-func (st PostgresStore) DeleteUser(ctx context.Context, id store.UserID) *store.StoreError {
+func (st PostgresStore) DeleteUser(ctx context.Context, id string) *store.StoreError {
 
 	const query = `
 		DELETE FROM users

@@ -10,12 +10,12 @@ import (
 
 func TestUserStore(t *testing.T, st store.Store) {
 
-	var User0_ID, _ = store.ParseUserID("user0")
+	var User0_ID = "user0"
 	var User0_Email = "user0@domain.com"
 	var User0_FullName = "First0 Middle0 Last0"
 	var User0_DisplayName = "First0"
 
-	var User1_ID, _ = store.ParseUserID("user1")
+	var User1_ID = "user1"
 	var User1_Email = "user1@domain.com"
 	var User1_FullName = "First1 Middle1 Last1"
 	var User1_DisplayName = "First1"

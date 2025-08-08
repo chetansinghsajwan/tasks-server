@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
+	"strings"
 	"tasks/errorcodes"
 	"tasks/option"
 	"tasks/store"
@@ -24,19 +24,19 @@ const (
 var ST store.Store
 
 type CreateUserBody struct {
-	ID          store.UserID `json:"id"`
-	Pass        string       `json:"pass"`
-	FullName    string       `json:"full_name"`
-	DisplayName *string      `json:"display_name"`
-	Email       string       `json:"email"`
+	ID          string  `json:"id"`
+	Pass        string  `json:"pass"`
+	FullName    string  `json:"full_name"`
+	DisplayName *string `json:"display_name"`
+	Email       string  `json:"email"`
 }
 
 type UpdateUserBody struct {
-	ID          *store.UserID `json:"id"`
-	Pass        *string       `json:"pass"`
-	FullName    *string       `json:"full_name"`
-	DisplayName *string       `json:"display_name"`
-	Email       *string       `json:"email"`
+	ID          *string `json:"id"`
+	Pass        *string `json:"pass"`
+	FullName    *string `json:"full_name"`
+	DisplayName *string `json:"display_name"`
+	Email       *string `json:"email"`
 }
 
 func CreateUser(c *gin.Context) {
@@ -59,8 +59,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	var serr *store.StoreError
-	serr = ST.CreateUser(ctx, store.CreateUserParams{
+	var serr *store.StoreError = ST.CreateUser(ctx, store.CreateUserParams{
 		ID:          body.ID,
 		Email:       body.Email,
 		FullName:    body.FullName,
@@ -127,12 +126,11 @@ func GetUser(c *gin.Context) {
 
 	defer cancel()
 
-	var err error
-	var userID store.UserID
-	if userID, err = store.ParseUserID(c.Param("id")); err != nil {
+	var userID string = c.Param("id")
+	if len(strings.TrimSpace(userID)) == 0 {
 
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": fmt.Sprintf("user id parse failed, err: %s", err.Error()),
+			"error": "user id must not be empty",
 		})
 		return
 	}
@@ -169,16 +167,16 @@ func UpdateUser(c *gin.Context) {
 
 	defer cancel()
 
-	var err error
-	var userID store.UserID
-	if userID, err = store.ParseUserID(c.Param("id")); err != nil {
+	var userID string = c.Param("id")
+	if len(strings.TrimSpace(userID)) == 0 {
 
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": fmt.Sprintf("user id parse failed, err: %s", err.Error()),
+			"error": "user id must not be empty",
 		})
 		return
 	}
 
+	var err error
 	var body UpdateUserBody
 	if err = c.BindJSON(&body); err != nil {
 
@@ -232,12 +230,11 @@ func DeleteUser(c *gin.Context) {
 
 	defer cancel()
 
-	var userID store.UserID
-	var err error
-	if userID, err = store.ParseUserID(c.Param("id")); err != nil {
+	var userID string = c.Param("id")
+	if len(strings.TrimSpace(userID)) == 0 {
 
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"error": "user id must not be empty",
 		})
 		return
 	}

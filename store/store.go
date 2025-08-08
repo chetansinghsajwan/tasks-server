@@ -6,15 +6,15 @@ import (
 
 type Store interface {
 	CreateUser(ctx context.Context, args CreateUserParams) *StoreError
-	GetUser(ctx context.Context, id UserID) (*User, *StoreError)
+	GetUser(ctx context.Context, id string) (*User, *StoreError)
 	GetUsersWhere(ctx context.Context, where string, count uint, from uint) ([]User, *StoreError)
-	UpdateUser(ctx context.Context, id UserID, args UpdateUserParams) *StoreError
-	DeleteUser(ctx context.Context, id UserID) *StoreError
+	UpdateUser(ctx context.Context, id string, args UpdateUserParams) *StoreError
+	DeleteUser(ctx context.Context, id string) *StoreError
 
 	CreateUserSecret(ctx context.Context, args CreateUserSecretParams) *StoreError
-	GetUserSecret(ctx context.Context, id UserID) (*UserSecret, *StoreError)
-	UpdateUserSecret(ctx context.Context, id UserID, args UpdateUserSecretParams) *StoreError
-	DeleteUserSecret(ctx context.Context, id UserID) *StoreError
+	GetUserSecret(ctx context.Context, id string) (*UserSecret, *StoreError)
+	UpdateUserSecret(ctx context.Context, id string, args UpdateUserSecretParams) *StoreError
+	DeleteUserSecret(ctx context.Context, id string) *StoreError
 
 	CreateList(ctx context.Context, args CreateListParams) (ListID, *StoreError)
 	GetList(ctx context.Context, id ListID) (*List, *StoreError)

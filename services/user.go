@@ -18,7 +18,7 @@ var ST store.Store
 
 type ServiceContext struct {
 	ctx    context.Context
-	UserID string
+	string string
 }
 
 type User struct {
@@ -45,18 +45,9 @@ type UpdateUserParams struct {
 
 func CreateUser(ctx ServiceContext, args CreateUserParams) error {
 
-	var userID store.UserID
-	var err error
-	userID, err = store.ParseUserID(args.ID)
-
-	if err != nil {
-
-		return err
-	}
-
 	var serr *store.StoreError
 	serr = ST.CreateUser(ctx.ctx, store.CreateUserParams{
-		ID:          userID,
+		ID:          args.ID,
 		Email:       args.Email,
 		FullName:    args.FullName,
 		DisplayName: option.FromPtr(args.DisplayName),
@@ -81,6 +72,7 @@ func CreateUser(ctx ServiceContext, args CreateUserParams) error {
 	}
 
 	// Encrypt the password
+	var err error
 	var hashedPass []byte
 	hashedPass, err = bcrypt.GenerateFromPassword(
 		[]byte(args.Pass), BcryptUserEncryptionCost)
@@ -92,7 +84,7 @@ func CreateUser(ctx ServiceContext, args CreateUserParams) error {
 
 	// Create user secrets
 	serr = ST.CreateUserSecret(ctx.ctx, store.CreateUserSecretParams{
-		ID:   userID,
+		ID:   args.ID,
 		Pass: string(hashedPass),
 	})
 
@@ -106,17 +98,9 @@ func CreateUser(ctx ServiceContext, args CreateUserParams) error {
 
 func GetUser(ctx ServiceContext, id string) (*User, error) {
 
-	var userID store.UserID
-	var err error
-
-	if userID, err = store.ParseUserID(id); err != nil {
-
-		return nil, err
-	}
-
 	var user *store.User
 	var serr *store.StoreError
-	if user, serr = ST.GetUser(ctx.ctx, userID); serr != nil {
+	if user, serr = ST.GetUser(ctx.ctx, id); serr != nil {
 
 		switch serr.Code {
 		case errorcodes.UserNotFound:
@@ -128,7 +112,7 @@ func GetUser(ctx ServiceContext, id string) (*User, error) {
 	}
 
 	return &User{
-		ID:          user.ID.String(),
+		ID:          user.ID,
 		FullName:    user.FullName,
 		DisplayName: user.DisplayName.Ptr(),
 	}, nil
@@ -136,29 +120,8 @@ func GetUser(ctx ServiceContext, id string) (*User, error) {
 
 func UpdateUser(ctx ServiceContext, id string, args UpdateUserParams) error {
 
-	var err error
-	var userID store.UserID
-
-	// Parse user id
-	if userID, err = store.ParseUserID(id); err != nil {
-
-		return err
-	}
-
-	// Parse args user id
-	var argsID *store.UserID
-	if args.ID != nil {
-		var _argsID store.UserID
-		if _argsID, err = store.ParseUserID(*args.ID); err != nil {
-
-			return err
-		}
-
-		argsID = &_argsID
-	}
-
-	var serr *store.StoreError = ST.UpdateUser(ctx.ctx, userID, store.UpdateUserParams{
-		ID:          option.Some(argsID),
+	var serr *store.StoreError = ST.UpdateUser(ctx.ctx, id, store.UpdateUserParams{
+		ID:          option.Some(args.ID),
 		Email:       option.Some(args.Email),
 		FullName:    option.Some(args.FullName),
 		DisplayName: option.FromPtr(args.DisplayName),
@@ -188,20 +151,13 @@ func UpdateUser(ctx ServiceContext, id string, args UpdateUserParams) error {
 
 func DeleteUser(ctx ServiceContext, id string) error {
 
-	var userID store.UserID
-	var err error
-
-	if userID, err = store.ParseUserID(id); err != nil {
-		return err
-	}
-
 	var serr *store.StoreError
-	if serr = ST.DeleteUser(ctx.ctx, userID); serr != nil {
+	if serr = ST.DeleteUser(ctx.ctx, id); serr != nil {
 
 		return errors.New(serr.Msg)
 	}
 
-	if serr = ST.DeleteUserSecret(ctx.ctx, userID); serr != nil {
+	if serr = ST.DeleteUserSecret(ctx.ctx, id); serr != nil {
 
 		return errors.New(serr.Msg)
 	}

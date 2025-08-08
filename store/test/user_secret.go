@@ -10,10 +10,10 @@ import (
 
 func TestUserSecretStore(t *testing.T, st store.Store) {
 
-	var ValidUserID_0, _ = store.ParseUserID("myid_0")
+	var ValidUserID_0 = "myid_0"
 	var ValidSecretPass_0 = "mypassword_0"
 
-	var ValidUserID_1, _ = store.ParseUserID("myid_1")
+	var ValidUserID_1 = "myid_1"
 	var ValidSecretPass_1 = "mypassword_1"
 
 	var ctx = context.Background()

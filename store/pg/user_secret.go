@@ -48,7 +48,7 @@ func (st PostgresStore) CreateUserSecret(ctx context.Context, args store.CreateU
 	return nil
 }
 
-func (st PostgresStore) GetUserSecret(ctx context.Context, id store.UserID) (*store.UserSecret, *store.StoreError) {
+func (st PostgresStore) GetUserSecret(ctx context.Context, id string) (*store.UserSecret, *store.StoreError) {
 
 	const query = `
 		select id, pass
@@ -81,7 +81,7 @@ func (st PostgresStore) GetUserSecret(ctx context.Context, id store.UserID) (*st
 	return &secret, nil
 }
 
-func (st PostgresStore) UpdateUserSecret(ctx context.Context, id store.UserID, args store.UpdateUserSecretParams) *store.StoreError {
+func (st PostgresStore) UpdateUserSecret(ctx context.Context, id string, args store.UpdateUserSecretParams) *store.StoreError {
 
 	const query = `
 		update users set
@@ -126,7 +126,7 @@ func (st PostgresStore) UpdateUserSecret(ctx context.Context, id store.UserID, a
 	return nil
 }
 
-func (st PostgresStore) DeleteUserSecret(ctx context.Context, id store.UserID) *store.StoreError {
+func (st PostgresStore) DeleteUserSecret(ctx context.Context, id string) *store.StoreError {
 
 	const query = `
 		delete from user_secrets

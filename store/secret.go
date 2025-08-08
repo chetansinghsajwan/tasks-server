@@ -1,12 +1,12 @@
 package store
 
 type UserSecret struct {
-	ID   UserID
+	ID   string
 	Pass string
 }
 
 type CreateUserSecretParams struct {
-	ID   UserID
+	ID   string
 	Pass string
 }
 
