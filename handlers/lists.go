@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"tasks/option"
 	"tasks/store"
 	"tasks/utils"
 	"time"
@@ -26,7 +25,7 @@ type CreateListRequest struct {
 }
 
 type UpdateListRequest struct {
-	Name option.Option[string] `json:"name"`
+	Name *string `json:"name"`
 }
 
 func CreateList(c *gin.Context) {

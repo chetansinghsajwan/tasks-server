@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 	"tasks/errorcodes"
-	"tasks/option"
 	"tasks/store"
 	"time"
 
@@ -63,7 +62,7 @@ func CreateUser(c *gin.Context) {
 		ID:          body.ID,
 		Email:       body.Email,
 		FullName:    body.FullName,
-		DisplayName: option.FromPtr(body.DisplayName),
+		DisplayName: body.DisplayName,
 	})
 
 	if serr != nil {
@@ -189,10 +188,10 @@ func UpdateUser(c *gin.Context) {
 
 	var serr *store.StoreError
 	var args = store.UpdateUserParams{
-		ID:          option.Some(body.ID),
-		Email:       option.Some(body.Email),
-		FullName:    option.Some(body.FullName),
-		DisplayName: option.Some(body.DisplayName),
+		ID:          &body.ID,
+		Email:       &body.Email,
+		FullName:    &body.FullName,
+		DisplayName: &body.DisplayName,
 	}
 	if serr = ST.UpdateUser(ctx, userID, args); serr != nil {
 

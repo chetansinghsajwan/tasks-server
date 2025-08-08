@@ -81,58 +81,58 @@ func (st PostgresStore) UpdateTask(ctx context.Context, id store.TaskID, args st
 	var queryArgIndex uint8 = 2
 	var queryArgs = []any{id}
 
-	if args.ListID.IsSome() {
+	if args.ListID != nil {
 		queryBuilder.WriteString(" list_id = $")
 		queryBuilder.WriteString(string(queryArgIndex))
-		queryArgs = append(queryArgs, args.ListID.MustGet())
+		queryArgs = append(queryArgs, *args.ListID)
 
 		queryArgIndex += 1
 	}
 
-	if args.Title.IsSome() {
+	if args.Title != nil {
 		queryBuilder.WriteString(" title = $")
 		queryBuilder.WriteString(string(queryArgIndex))
-		queryArgs = append(queryArgs, args.Title.MustGet())
+		queryArgs = append(queryArgs, *args.Title)
 
 		queryArgIndex += 1
 	}
 
-	if args.Description.IsSome() {
+	if args.Description != nil {
 		queryBuilder.WriteString(" description = $")
 		queryBuilder.WriteString(string(queryArgIndex))
-		queryArgs = append(queryArgs, args.Description.MustGet())
+		queryArgs = append(queryArgs, *args.Description)
 
 		queryArgIndex += 1
 	}
 
-	if args.Priority.IsSome() {
+	if args.Priority != nil {
 		queryBuilder.WriteString(" priority = $")
 		queryBuilder.WriteString(string(queryArgIndex))
-		queryArgs = append(queryArgs, args.Priority.MustGet())
+		queryArgs = append(queryArgs, *args.Priority)
 
 		queryArgIndex += 1
 	}
 
-	if args.DueDate.IsSome() {
+	if args.DueDate != nil {
 		queryBuilder.WriteString(" due_date = $")
 		queryBuilder.WriteString(string(queryArgIndex))
-		queryArgs = append(queryArgs, args.DueDate.MustGet())
+		queryArgs = append(queryArgs, *args.DueDate)
 
 		queryArgIndex += 1
 	}
 
-	if args.Assignee.IsSome() {
+	if args.Assignee != nil {
 		queryBuilder.WriteString(" assignee = $")
 		queryBuilder.WriteString(string(queryArgIndex))
-		queryArgs = append(queryArgs, args.Assignee.MustGet())
+		queryArgs = append(queryArgs, *args.Assignee)
 
 		queryArgIndex += 1
 	}
 
-	if args.Labels.IsSome() {
+	if args.Labels != nil {
 		queryBuilder.WriteString(" owner_id = $")
 		queryBuilder.WriteString(string(queryArgIndex))
-		queryArgs = append(queryArgs, args.Labels.MustGet())
+		queryArgs = append(queryArgs, *args.Labels)
 
 		queryArgIndex += 1
 	}

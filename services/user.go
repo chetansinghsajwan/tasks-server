@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"tasks/errorcodes"
-	"tasks/option"
 	"tasks/store"
 
 	"golang.org/x/crypto/bcrypt"
@@ -50,7 +49,7 @@ func CreateUser(ctx ServiceContext, args CreateUserParams) error {
 		ID:          args.ID,
 		Email:       args.Email,
 		FullName:    args.FullName,
-		DisplayName: option.FromPtr(args.DisplayName),
+		DisplayName: args.DisplayName,
 	})
 
 	if serr != nil {
@@ -114,17 +113,17 @@ func GetUser(ctx ServiceContext, id string) (*User, error) {
 	return &User{
 		ID:          user.ID,
 		FullName:    user.FullName,
-		DisplayName: user.DisplayName.Ptr(),
+		DisplayName: user.DisplayName,
 	}, nil
 }
 
 func UpdateUser(ctx ServiceContext, id string, args UpdateUserParams) error {
 
 	var serr *store.StoreError = ST.UpdateUser(ctx.ctx, id, store.UpdateUserParams{
-		ID:          option.Some(args.ID),
-		Email:       option.Some(args.Email),
-		FullName:    option.Some(args.FullName),
-		DisplayName: option.FromPtr(args.DisplayName),
+		ID:          &args.ID,
+		Email:       &args.Email,
+		FullName:    &args.FullName,
+		DisplayName: args.DisplayName,
 	})
 
 	if serr != nil {

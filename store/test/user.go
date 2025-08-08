@@ -3,8 +3,8 @@ package test
 import (
 	"context"
 	"tasks/errorcodes"
-	"tasks/option"
 	"tasks/store"
+	"tasks/utils"
 	"testing"
 )
 
@@ -31,7 +31,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserIDFormat {
@@ -46,7 +46,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "   ",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserIDFormat {
@@ -61,7 +61,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "-username",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserIDFormat {
@@ -76,7 +76,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "username-",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserIDFormat {
@@ -91,7 +91,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "user--name",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserIDFormat {
@@ -106,7 +106,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          " username",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserIDFormat {
@@ -121,7 +121,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "username ",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserIDFormat {
@@ -136,7 +136,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    "  ",
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserFullNameFormat {
@@ -151,7 +151,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    User0_FullName + " ",
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserFullNameFormat {
@@ -166,7 +166,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    " " + User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: &User0_DisplayName,
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserFullNameFormat {
@@ -181,7 +181,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(" "),
+		DisplayName: utils.Ptr(" "),
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserDisplayNameFormat {
@@ -196,7 +196,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName + " "),
+		DisplayName: utils.Ptr(User0_DisplayName + " "),
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserDisplayNameFormat {
@@ -211,7 +211,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          "username0",
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(" " + User0_DisplayName),
+		DisplayName: utils.Ptr(" " + User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserDisplayNameFormat {
@@ -226,7 +226,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          User0_ID,
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: utils.Ptr(User0_DisplayName),
 	})
 
 	if serr != nil {
@@ -251,7 +251,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		ID:          User0_ID,
 		Email:       User0_Email,
 		FullName:    User0_FullName,
-		DisplayName: option.Some(User0_DisplayName),
+		DisplayName: utils.Ptr(User0_DisplayName),
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserIDAlreadyExists {
@@ -277,17 +277,16 @@ func TestUserStore(t *testing.T, st store.Store) {
 		t.Fatalf("Expected user.email '%s', got: %s", User0_FullName, user.FullName)
 	}
 
-	if user.DisplayName.MustGet() != User0_DisplayName {
-		t.Fatalf("Expected user.email '%s', got: %s", User0_DisplayName, user.DisplayName.MustGet())
+	if *user.DisplayName != User0_DisplayName {
+		t.Fatalf("Expected user.email '%s', got: %s", User0_DisplayName, *user.DisplayName)
 	}
 
 	// ---------------------------------------------------------------------------------------------
 	// Update user with invalid FullName
 	// ---------------------------------------------------------------------------------------------
 
-	var fullName = " "
 	serr = st.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
-		FullName: option.Some(&fullName),
+		FullName: utils.DoublePtr(" "),
 	})
 
 	if serr == nil || serr.Code != errorcodes.UserFullNameFormat {
@@ -299,10 +298,10 @@ func TestUserStore(t *testing.T, st store.Store) {
 	// ---------------------------------------------------------------------------------------------
 
 	serr = st.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
-		ID:          option.Some(&User1_ID),
-		Email:       option.Some(&User1_Email),
-		FullName:    option.Some(&User1_FullName),
-		DisplayName: option.Some(&User1_DisplayName),
+		ID:          utils.Ptr(&User1_ID),
+		Email:       utils.Ptr(&User1_Email),
+		FullName:    utils.Ptr(&User1_FullName),
+		DisplayName: utils.Ptr(&User1_DisplayName),
 	})
 
 	if serr != nil {
@@ -331,8 +330,8 @@ func TestUserStore(t *testing.T, st store.Store) {
 		t.Fatalf("Expected User.FullName '%s', got: '%s'", User1_FullName, user.FullName)
 	}
 
-	if user.DisplayName.MustGet() != User1_DisplayName {
-		t.Fatalf("Expected User.DisplayName '%s', got: '%s'", User1_DisplayName, user.DisplayName.MustGet())
+	if *user.DisplayName != User1_DisplayName {
+		t.Fatalf("Expected User.DisplayName '%s', got: '%s'", User1_DisplayName, *user.DisplayName)
 	}
 
 	// ---------------------------------------------------------------------------------------------

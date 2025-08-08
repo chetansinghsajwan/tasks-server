@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"tasks/option"
 	"tasks/store"
 	"tasks/utils"
 
@@ -149,9 +148,9 @@ func RemoveListAccess(c *gin.Context) {
 
 	// Add list access
 	var serr *store.StoreError = ST.RemoveListAccess(ctx, store.RemoveListAccessParams{
-		UserID: option.Some(body.UserID),
-		ListID: option.Some(listID),
-		Access: option.Some(body.Access),
+		UserID: &body.UserID,
+		ListID: &listID,
+		Access: &body.Access,
 	})
 
 	if serr != nil {

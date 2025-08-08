@@ -119,7 +119,7 @@ func (st PostgresStore) GetListAccess(ctx context.Context, args store.GetListAcc
 func (st PostgresStore) RemoveListAccess(ctx context.Context, args store.RemoveListAccessParams) *store.StoreError {
 
 	// There is nothing to remove
-	if args.UserID.IsNone() && args.ListID.IsNone() && args.Access.IsNone() {
+	if args.UserID == nil && args.ListID == nil && args.Access == nil {
 		return nil
 	}
 
@@ -128,29 +128,29 @@ func (st PostgresStore) RemoveListAccess(ctx context.Context, args store.RemoveL
 	var queryBuilder strings.Builder
 	queryBuilder.WriteString("delete from list_access where ")
 
-	if args.UserID.IsSome() {
+	if args.UserID != nil {
 		queryBuilder.WriteString("user_id = $1")
-		queryArgs = append(queryArgs, args.UserID.MustGet())
+		queryArgs = append(queryArgs, *args.UserID)
 	}
 
-	if args.ListID.IsSome() {
+	if args.ListID != nil {
 
 		if len(queryArgs) != 0 {
 			queryBuilder.WriteString(", ")
 		}
 
 		queryBuilder.WriteString(fmt.Sprintf("list_id = $%d", len(queryArgs)+1))
-		queryArgs = append(queryArgs, args.ListID.MustGet())
+		queryArgs = append(queryArgs, *args.ListID)
 	}
 
-	if args.Access.IsSome() {
+	if args.Access != nil {
 
 		if len(queryArgs) != 0 {
 			queryBuilder.WriteString(", ")
 		}
 
 		queryBuilder.WriteString(fmt.Sprintf("access = any($%d::list_access_type[])", len(queryArgs)+1))
-		queryArgs = append(queryArgs, args.Access.MustGet())
+		queryArgs = append(queryArgs, *args.Access)
 	}
 
 	// Delete the accesses

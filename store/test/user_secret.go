@@ -3,8 +3,8 @@ package test
 import (
 	"context"
 	"tasks/errorcodes"
-	"tasks/option"
 	"tasks/store"
+	"tasks/utils"
 	"testing"
 )
 
@@ -22,7 +22,7 @@ func TestUserSecretStore(t *testing.T, st store.Store) {
 		ID:          ValidUserID_0,
 		Email:       "email@domain.com",
 		FullName:    "First Middle Last",
-		DisplayName: option.Some("First"),
+		DisplayName: utils.Ptr("First"),
 	})
 
 	t.Run("Create secret non existing user", func(t *testing.T) {

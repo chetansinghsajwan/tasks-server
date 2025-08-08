@@ -1,9 +1,5 @@
 package store
 
-import (
-	"tasks/option"
-)
-
 type ListAccessType string
 
 const (
@@ -35,7 +31,7 @@ type AddListAccessParams struct {
 }
 
 type RemoveListAccessParams struct {
-	UserID option.Option[string]
-	ListID option.Option[uint64]
-	Access option.Option[[]ListAccessType]
+	UserID *string
+	ListID *uint64
+	Access *[]ListAccessType
 }

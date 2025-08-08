@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"tasks/option"
 	"tasks/store"
 	"time"
 
@@ -18,23 +17,23 @@ const (
 )
 
 type CreateTaskRequest struct {
-	ListID      uint64                   `json:"list_id"`
-	Title       string                   `json:"title"`
-	Description option.Option[string]    `json:"description"`
-	Priority    option.Option[uint32]    `json:"priority"`
-	DueDate     option.Option[time.Time] `json:"due_date"`
-	Assignee    option.Option[string]    `json:"assignee"`
-	Labels      []string                 `json:"labels"`
+	ListID      uint64     `json:"list_id"`
+	Title       string     `json:"title"`
+	Description *string    `json:"description"`
+	Priority    *uint32    `json:"priority"`
+	DueDate     *time.Time `json:"due_date"`
+	Assignee    *string    `json:"assignee"`
+	Labels      []string   `json:"labels"`
 }
 
 type UpdateTaskRequest struct {
-	ListID      option.Option[*uint64]    `json:"list_id"`
-	Title       option.Option[*string]    `json:"title"`
-	Description option.Option[*string]    `json:"description"`
-	Priority    option.Option[*uint32]    `json:"priority"`
-	DueDate     option.Option[*time.Time] `json:"due_date"`
-	Assignee    option.Option[*string]    `json:"assignee"`
-	Labels      option.Option[[]string]   `json:"labels"`
+	ListID      **uint64    `json:"list_id"`
+	Title       **string    `json:"title"`
+	Description **string    `json:"description"`
+	Priority    **uint32    `json:"priority"`
+	DueDate     **time.Time `json:"due_date"`
+	Assignee    **string    `json:"assignee"`
+	Labels      *[]string   `json:"labels"`
 }
 
 func CreateTask(c *gin.Context) {

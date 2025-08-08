@@ -2,7 +2,6 @@ package store
 
 import (
 	"fmt"
-	"tasks/option"
 	"tasks/utils"
 	"time"
 )
@@ -33,32 +32,32 @@ func (id TaskID) Format(f fmt.State, verb rune) {
 }
 
 type Task struct {
-	ID          TaskID                   `db:"id" json:"id"`
-	ListID      uint64                   `db:"list_id" json:"list_id"`
-	Title       string                   `db:"title" json:"title"`
-	Description option.Option[string]    `db:"description" json:"description"`
-	Priority    option.Option[uint32]    `db:"priority" json:"priority"`
-	DueDate     option.Option[time.Time] `db:"due_date" json:"due_date"`
-	Assignee    option.Option[string]    `db:"assignee" json:"assignee"`
-	Labels      []string                 `db:"labels" json:"labels"`
+	ID          TaskID     `db:"id" json:"id"`
+	ListID      uint64     `db:"list_id" json:"list_id"`
+	Title       string     `db:"title" json:"title"`
+	Description *string    `db:"description" json:"description"`
+	Priority    *uint32    `db:"priority" json:"priority"`
+	DueDate     *time.Time `db:"due_date" json:"due_date"`
+	Assignee    *string    `db:"assignee" json:"assignee"`
+	Labels      []string   `db:"labels" json:"labels"`
 }
 
 type CreateTaskParams struct {
-	ListID      uint64                   `db:"list_id" json:"list_id"`
-	Title       string                   `db:"title" json:"title"`
-	Description option.Option[string]    `db:"description" json:"description"`
-	Priority    option.Option[uint32]    `db:"priority" json:"priority"`
-	DueDate     option.Option[time.Time] `db:"due_date" json:"due_date"`
-	Assignee    option.Option[string]    `db:"assignee" json:"assignee"`
-	Labels      []string                 `db:"labels" json:"labels"`
+	ListID      uint64     `db:"list_id" json:"list_id"`
+	Title       string     `db:"title" json:"title"`
+	Description *string    `db:"description" json:"description"`
+	Priority    *uint32    `db:"priority" json:"priority"`
+	DueDate     *time.Time `db:"due_date" json:"due_date"`
+	Assignee    *string    `db:"assignee" json:"assignee"`
+	Labels      []string   `db:"labels" json:"labels"`
 }
 
 type UpdateTaskParams struct {
-	ListID      option.Option[*uint64]    `db:"list_id" json:"list_id"`
-	Title       option.Option[*string]    `db:"title" json:"title"`
-	Description option.Option[*string]    `db:"description" json:"description"`
-	Priority    option.Option[*uint32]    `db:"priority" json:"priority"`
-	DueDate     option.Option[*time.Time] `db:"due_date" json:"due_date"`
-	Assignee    option.Option[*string]    `db:"assignee" json:"assignee"`
-	Labels      option.Option[[]string]   `db:"labels" json:"labels"`
+	ListID      **uint64    `db:"list_id" json:"list_id"`
+	Title       **string    `db:"title" json:"title"`
+	Description **string    `db:"description" json:"description"`
+	Priority    **uint32    `db:"priority" json:"priority"`
+	DueDate     **time.Time `db:"due_date" json:"due_date"`
+	Assignee    **string    `db:"assignee" json:"assignee"`
+	Labels      *[]string   `db:"labels" json:"labels"`
 }
