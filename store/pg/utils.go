@@ -1,63 +1,10 @@
-package store
+package pg
 
 import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgconn"
 )
-
-type ErrorCode uint32
-
-const (
-	ErrorCode_Unknown ErrorCode = iota
-	ErrorCode_TxCreate
-	ErrorCode_TxCommit
-
-	// User related errors
-	ErrorCode_UserNotFound
-	ErrorCode_UserIDNull
-	ErrorCode_UserIDAlreadyExists
-	ErrorCode_UserIDFormat
-	ErrorCode_UserEmailNull
-	ErrorCode_UserEmailAlreadyExists
-	ErrorCode_UserEmailFormat
-	ErrorCode_UserFullNameFormat
-	ErrorCode_UserDisplayNameFormat
-
-	// List related errors
-	ErrorCode_ListNotFound
-	ErrorCode_ListIDNull
-	ErrorCode_ListIDAlreadyExists
-	ErrorCode_ListIDFormat
-
-	// List Accesss related errors
-	ErrorCode_ListAccessNotFound
-	ErrorCode_ListAccessAlreadyExists
-	ErrorCode_ListAccessOwnerAlreadyExists
-
-	// Task related errors
-	ErrorCode_TaskNotFoundCode
-
-	// Secret related errors
-	ErrorCode_UserSecretNotFound
-	ErrorCode_InvalidSecretIDFormat
-	ErrorCode_InvalidSecretScope
-	ErrorCode_InvalidUserSecretPassFormat
-)
-
-type StoreError struct {
-	Code         ErrorCode
-	Msg          string
-	WrappedError error
-}
-
-func (e *StoreError) Error() string {
-	return e.Msg
-}
-
-func (e *StoreError) Unwrap() error {
-	return e.WrappedError
-}
 
 func PrintPgError(err *pgconn.PgError) {
 

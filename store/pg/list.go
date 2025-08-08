@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"tasks/errorcodes"
 	"tasks/store"
 
 	"github.com/jackc/pgx/v5"
@@ -27,7 +28,7 @@ func (st PostgresStore) CreateList(ctx context.Context,
 	if err = row.Scan(&listID); err != nil {
 
 		return store.NullListID(), &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -55,14 +56,14 @@ func (st PostgresStore) GetList(ctx context.Context,
 		if errors.Unwrap(err) == sql.ErrNoRows {
 
 			return nil, &store.StoreError{
-				Code:         store.ErrorCode_ListNotFound,
+				Code:         errorcodes.ListNotFound,
 				Msg:          fmt.Sprintf("list with id '%s' not found", id),
 				WrappedError: err,
 			}
 		}
 
 		return nil, &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -84,7 +85,7 @@ func (st PostgresStore) UpdateList(ctx context.Context, id store.ListID, args st
 	if cmd, err = st.Pool.Exec(ctx, query, id, args.Name); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -93,7 +94,7 @@ func (st PostgresStore) UpdateList(ctx context.Context, id store.ListID, args st
 	if !cmd.Update() {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_ListNotFound,
+			Code:         errorcodes.ListNotFound,
 			Msg:          fmt.Sprintf("list with id '%s' not found", id),
 			WrappedError: err,
 		}
@@ -115,7 +116,7 @@ func (st PostgresStore) DeleteList(ctx context.Context,
 	if cmd, err = st.Pool.Exec(ctx, query, id); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -124,7 +125,7 @@ func (st PostgresStore) DeleteList(ctx context.Context,
 	if !cmd.Delete() {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_ListNotFound,
+			Code:         errorcodes.ListNotFound,
 			Msg:          fmt.Sprintf("list with id '%s' not found", id),
 			WrappedError: err,
 		}

@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"tasks/errorcodes"
 	"tasks/option"
 	"tasks/store"
 	"testing"
@@ -33,7 +34,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
+	if serr == nil || serr.Code != errorcodes.UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
@@ -48,7 +49,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
+	if serr == nil || serr.Code != errorcodes.UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
@@ -63,7 +64,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
+	if serr == nil || serr.Code != errorcodes.UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
@@ -78,7 +79,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
+	if serr == nil || serr.Code != errorcodes.UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
@@ -93,7 +94,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
+	if serr == nil || serr.Code != errorcodes.UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
@@ -108,7 +109,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
+	if serr == nil || serr.Code != errorcodes.UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
@@ -123,7 +124,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserIDFormat {
+	if serr == nil || serr.Code != errorcodes.UserIDFormat {
 		t.Fatalf("Expected store.ErrUserIDFormatCode error, got: %v", serr)
 	}
 
@@ -138,7 +139,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserFullNameFormat {
+	if serr == nil || serr.Code != errorcodes.UserFullNameFormat {
 		t.Fatalf("Expected store.ErrUserFullNameFormatCode error, got: %v", serr)
 	}
 
@@ -153,7 +154,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserFullNameFormat {
+	if serr == nil || serr.Code != errorcodes.UserFullNameFormat {
 		t.Fatalf("Expected store.ErrUserFullNameFormatCode error, got: %v", serr)
 	}
 
@@ -168,7 +169,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserFullNameFormat {
+	if serr == nil || serr.Code != errorcodes.UserFullNameFormat {
 		t.Fatalf("Expected store.ErrUserFullNameFormatCode error, got: %v", serr)
 	}
 
@@ -183,8 +184,8 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(" "),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserDisplayNameFormat {
-		t.Fatalf("Expected store.ErrorCode_UserDisplayNameFormat error, got: %v", serr)
+	if serr == nil || serr.Code != errorcodes.UserDisplayNameFormat {
+		t.Fatalf("Expected errorcodes.UserDisplayNameFormat error, got: %v", serr)
 	}
 
 	// ---------------------------------------------------------------------------------------------
@@ -198,8 +199,8 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName + " "),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserDisplayNameFormat {
-		t.Fatalf("Expected store.ErrorCode_UserDisplayNameFormat error, got: %v", serr)
+	if serr == nil || serr.Code != errorcodes.UserDisplayNameFormat {
+		t.Fatalf("Expected errorcodes.UserDisplayNameFormat error, got: %v", serr)
 	}
 
 	// ---------------------------------------------------------------------------------------------
@@ -213,8 +214,8 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(" " + User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserDisplayNameFormat {
-		t.Fatalf("Expected store.ErrorCode_UserDisplayNameFormat error, got: %v", serr)
+	if serr == nil || serr.Code != errorcodes.UserDisplayNameFormat {
+		t.Fatalf("Expected errorcodes.UserDisplayNameFormat error, got: %v", serr)
 	}
 
 	// ---------------------------------------------------------------------------------------------
@@ -238,8 +239,8 @@ func TestUserStore(t *testing.T, st store.Store) {
 
 	_, serr = st.GetUser(ctx, "usernamenotexists")
 
-	if serr == nil || serr.Code != store.ErrorCode_UserNotFound {
-		t.Fatalf("Expected store.ErrorCode_UserNotFound error, got: %v", serr)
+	if serr == nil || serr.Code != errorcodes.UserNotFound {
+		t.Fatalf("Expected errorcodes.UserNotFound error, got: %v", serr)
 	}
 
 	// ---------------------------------------------------------------------------------------------
@@ -253,7 +254,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 		DisplayName: option.Some(User0_DisplayName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserIDAlreadyExists {
+	if serr == nil || serr.Code != errorcodes.UserIDAlreadyExists {
 		t.Fatalf("Expected store.ErrUserIDAlreadyExistsCode error, got: %v", serr)
 	}
 
@@ -289,8 +290,8 @@ func TestUserStore(t *testing.T, st store.Store) {
 		FullName: option.Some(&fullName),
 	})
 
-	if serr == nil || serr.Code != store.ErrorCode_UserFullNameFormat {
-		t.Fatalf("Expected store.ErrorCode_UserFullNameFormat error, got: %v", serr)
+	if serr == nil || serr.Code != errorcodes.UserFullNameFormat {
+		t.Fatalf("Expected errorcodes.UserFullNameFormat error, got: %v", serr)
 	}
 
 	// ---------------------------------------------------------------------------------------------
@@ -350,7 +351,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 
 	serr = st.DeleteUser(ctx, User1_ID)
 
-	if serr == nil || serr.Code != store.ErrorCode_UserNotFound {
-		t.Fatalf("Expected store.ErrorCode_UserNotFound error, got: %v", serr)
+	if serr == nil || serr.Code != errorcodes.UserNotFound {
+		t.Fatalf("Expected errorcodes.UserNotFound error, got: %v", serr)
 	}
 }

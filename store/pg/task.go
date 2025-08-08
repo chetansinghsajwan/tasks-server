@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"tasks/errorcodes"
 	"tasks/store"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -26,14 +27,8 @@ func (st PostgresStore) CreateTask(ctx context.Context,
 
 	if err != nil {
 
-		var pgerr *pgconn.PgError
-		if errors.As(err, &pgerr) {
-
-			store.PrintPgError(pgerr)
-		}
-
 		return store.NullTaskID(), &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -61,14 +56,14 @@ func (st PostgresStore) GetTask(ctx context.Context,
 		if errors.Unwrap(err) == sql.ErrNoRows {
 
 			return nil, &store.StoreError{
-				Code:         store.ErrorCode_TaskNotFoundCode,
+				Code:         errorcodes.TaskNotFoundCode,
 				Msg:          fmt.Sprintf("task with id '%v' not found", id),
 				WrappedError: err,
 			}
 		}
 
 		return nil, &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -154,7 +149,7 @@ func (st PostgresStore) UpdateTask(ctx context.Context, id store.TaskID, args st
 	if cmd, err = st.Pool.Exec(ctx, queryBuilder.String(), queryArgs...); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -163,7 +158,7 @@ func (st PostgresStore) UpdateTask(ctx context.Context, id store.TaskID, args st
 	if !cmd.Update() {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_TaskNotFoundCode,
+			Code:         errorcodes.TaskNotFoundCode,
 			Msg:          fmt.Sprintf("task with id '%v' not found", id),
 			WrappedError: err,
 		}
@@ -185,7 +180,7 @@ func (st PostgresStore) DeleteTask(ctx context.Context,
 	if cmd, err = st.Pool.Exec(ctx, query, id); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -194,7 +189,7 @@ func (st PostgresStore) DeleteTask(ctx context.Context,
 	if !cmd.Delete() {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_TaskNotFoundCode,
+			Code:         errorcodes.TaskNotFoundCode,
 			Msg:          fmt.Sprintf("task with id '%v' not found", id),
 			WrappedError: err,
 		}

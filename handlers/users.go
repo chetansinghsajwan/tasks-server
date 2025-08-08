@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"tasks/errorcodes"
 	"tasks/option"
 	"tasks/store"
 	"time"
@@ -69,14 +70,14 @@ func CreateUser(c *gin.Context) {
 	if serr != nil {
 
 		switch serr.Code {
-		case store.ErrorCode_UserIDNull,
-			store.ErrorCode_UserIDAlreadyExists,
-			store.ErrorCode_UserIDFormat,
-			store.ErrorCode_UserEmailNull,
-			store.ErrorCode_UserEmailAlreadyExists,
-			store.ErrorCode_UserEmailFormat,
-			store.ErrorCode_UserFullNameFormat,
-			store.ErrorCode_UserDisplayNameFormat:
+		case errorcodes.UserIDNull,
+			errorcodes.UserIDAlreadyExists,
+			errorcodes.UserIDFormat,
+			errorcodes.UserEmailNull,
+			errorcodes.UserEmailAlreadyExists,
+			errorcodes.UserEmailFormat,
+			errorcodes.UserFullNameFormat,
+			errorcodes.UserDisplayNameFormat:
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": serr.Msg,
@@ -141,7 +142,7 @@ func GetUser(c *gin.Context) {
 	if user, serr = ST.GetUser(ctx, userID); serr != nil {
 
 		switch serr.Code {
-		case store.ErrorCode_UserNotFound:
+		case errorcodes.UserNotFound:
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": serr.Msg,
@@ -198,15 +199,15 @@ func UpdateUser(c *gin.Context) {
 	if serr = ST.UpdateUser(ctx, userID, args); serr != nil {
 
 		switch serr.Code {
-		case store.ErrorCode_UserNotFound,
-			store.ErrorCode_UserIDNull,
-			store.ErrorCode_UserIDAlreadyExists,
-			store.ErrorCode_UserIDFormat,
-			store.ErrorCode_UserEmailNull,
-			store.ErrorCode_UserEmailAlreadyExists,
-			store.ErrorCode_UserEmailFormat,
-			store.ErrorCode_UserFullNameFormat,
-			store.ErrorCode_UserDisplayNameFormat:
+		case errorcodes.UserNotFound,
+			errorcodes.UserIDNull,
+			errorcodes.UserIDAlreadyExists,
+			errorcodes.UserIDFormat,
+			errorcodes.UserEmailNull,
+			errorcodes.UserEmailAlreadyExists,
+			errorcodes.UserEmailFormat,
+			errorcodes.UserFullNameFormat,
+			errorcodes.UserDisplayNameFormat:
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": serr.Msg,
@@ -245,7 +246,7 @@ func DeleteUser(c *gin.Context) {
 	if serr = ST.DeleteUser(ctx, userID); serr != nil {
 
 		switch serr.Code {
-		case store.ErrorCode_UserNotFound:
+		case errorcodes.UserNotFound:
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": serr.Msg,

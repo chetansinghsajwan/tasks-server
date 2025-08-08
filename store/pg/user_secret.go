@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"tasks/errorcodes"
 	"tasks/store"
 
 	"github.com/jackc/pgerrcode"
@@ -30,7 +31,7 @@ func (st PostgresStore) CreateUserSecret(ctx context.Context, args store.CreateU
 				pgerr.ConstraintName == "user_secrets_value_format_check" {
 
 				return &store.StoreError{
-					Code:         store.ErrorCode_InvalidUserSecretPassFormat,
+					Code:         errorcodes.InvalidUserSecretPassFormat,
 					Msg:          fmt.Sprintf("user secret pass '%s' format is not correct. hint: %s", args.Pass, invalidUserSecretPassFormatHint),
 					WrappedError: err,
 				}
@@ -38,7 +39,7 @@ func (st PostgresStore) CreateUserSecret(ctx context.Context, args store.CreateU
 		}
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -64,14 +65,14 @@ func (st PostgresStore) GetUserSecret(ctx context.Context, id store.UserID) (*st
 		if errors.Unwrap(err) == sql.ErrNoRows {
 
 			return nil, &store.StoreError{
-				Code:         store.ErrorCode_UserSecretNotFound,
+				Code:         errorcodes.UserSecretNotFound,
 				Msg:          fmt.Sprintf("user secret with id '%s' not found", id),
 				WrappedError: err,
 			}
 		}
 
 		return nil, &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -99,7 +100,7 @@ func (st PostgresStore) UpdateUserSecret(ctx context.Context, id store.UserID, a
 				pgerr.ConstraintName == "user_secrets_value_format_check" {
 
 				return &store.StoreError{
-					Code:         store.ErrorCode_InvalidUserSecretPassFormat,
+					Code:         errorcodes.InvalidUserSecretPassFormat,
 					Msg:          fmt.Sprintf("user secret pass '%s' format is not correct. hint: %s", args.Pass, invalidUserSecretPassFormatHint),
 					WrappedError: err,
 				}
@@ -107,7 +108,7 @@ func (st PostgresStore) UpdateUserSecret(ctx context.Context, id store.UserID, a
 		}
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -116,7 +117,7 @@ func (st PostgresStore) UpdateUserSecret(ctx context.Context, id store.UserID, a
 	if cmd.RowsAffected() == 0 {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_UserSecretNotFound,
+			Code:         errorcodes.UserSecretNotFound,
 			Msg:          fmt.Sprintf("user secret with id '%s' not found", id),
 			WrappedError: err,
 		}
@@ -137,7 +138,7 @@ func (st PostgresStore) DeleteUserSecret(ctx context.Context, id store.UserID) *
 	if cmd, err = st.Pool.Exec(ctx, query, id); err != nil {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_Unknown,
+			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
 		}
@@ -146,7 +147,7 @@ func (st PostgresStore) DeleteUserSecret(ctx context.Context, id store.UserID) *
 	if cmd.RowsAffected() == 0 {
 
 		return &store.StoreError{
-			Code:         store.ErrorCode_UserSecretNotFound,
+			Code:         errorcodes.UserSecretNotFound,
 			Msg:          fmt.Sprintf("user secret with id '%s' not found", id),
 			WrappedError: err,
 		}

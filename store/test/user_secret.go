@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"tasks/errorcodes"
 	"tasks/option"
 	"tasks/store"
 	"testing"
@@ -31,8 +32,8 @@ func TestUserSecretStore(t *testing.T, st store.Store) {
 			Pass: ValidSecretPass_0,
 		})
 
-		if serr == nil || serr.Code != store.ErrorCode_UserNotFound {
-			t.Fatalf("Expected store.ErrorCode_UserNotFound error, got %v", serr)
+		if serr == nil || serr.Code != errorcodes.UserNotFound {
+			t.Fatalf("Expected errorcodes.UserNotFound error, got %v", serr)
 		}
 	})
 
@@ -43,8 +44,8 @@ func TestUserSecretStore(t *testing.T, st store.Store) {
 			Pass: "  ",
 		})
 
-		if serr == nil || serr.Code != store.ErrorCode_InvalidUserSecretPassFormat {
-			t.Fatalf("Expected store.ErrorCode_InvalidSecretValueFormat error, got %v", serr)
+		if serr == nil || serr.Code != errorcodes.InvalidUserSecretPassFormat {
+			t.Fatalf("Expected errorcodes.InvalidSecretValueFormat error, got %v", serr)
 		}
 	})
 
@@ -66,8 +67,8 @@ func TestUserSecretStore(t *testing.T, st store.Store) {
 
 		_, serr = st.GetUserSecret(ctx, ValidUserID_1)
 
-		if serr == nil || serr.Code != store.ErrorCode_UserSecretNotFound {
-			t.Fatalf("Expected store.ErrorCode_SecretNotFound error, got %v", serr)
+		if serr == nil || serr.Code != errorcodes.UserSecretNotFound {
+			t.Fatalf("Expected errorcodes.SecretNotFound error, got %v", serr)
 		}
 	})
 
@@ -99,8 +100,8 @@ func TestUserSecretStore(t *testing.T, st store.Store) {
 			},
 		)
 
-		if serr == nil || serr.Code != store.ErrorCode_UserNotFound {
-			t.Fatalf("Expected store.ErrorCode_UserNotFound error, got %v", serr)
+		if serr == nil || serr.Code != errorcodes.UserNotFound {
+			t.Fatalf("Expected errorcodes.UserNotFound error, got %v", serr)
 		}
 	})
 
@@ -112,8 +113,8 @@ func TestUserSecretStore(t *testing.T, st store.Store) {
 			},
 		)
 
-		if serr == nil || serr.Code != store.ErrorCode_InvalidUserSecretPassFormat {
-			t.Fatalf("Expected store.ErrorCode_InvalidSecretValueFormat error, got %v", serr)
+		if serr == nil || serr.Code != errorcodes.InvalidUserSecretPassFormat {
+			t.Fatalf("Expected errorcodes.InvalidSecretValueFormat error, got %v", serr)
 		}
 	})
 
@@ -163,8 +164,8 @@ func TestUserSecretStore(t *testing.T, st store.Store) {
 
 		var serr *store.StoreError = st.DeleteUserSecret(ctx, ValidUserID_1)
 
-		if serr == nil || serr.Code != store.ErrorCode_UserSecretNotFound {
-			t.Fatalf("Expected store.ErrorCode_SecretNotFound error, got %v", serr)
+		if serr == nil || serr.Code != errorcodes.UserSecretNotFound {
+			t.Fatalf("Expected errorcodes.SecretNotFound error, got %v", serr)
 		}
 	})
 }
