@@ -8,6 +8,10 @@ const (
 	TxCreate
 	TxCommit
 
+	// Auth related errors
+	InvalidToken
+	AuthMatchFail
+
 	// User related errors
 	UserNotFound
 	UserIDNull
