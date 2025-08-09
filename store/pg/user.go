@@ -188,7 +188,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 
 				return &store.StoreError{
 					Code:         errorcodes.InvalidUserDisplayNameFormat,
-					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.DisplayName, invalidUserDisplayNameFormatHint),
+					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", *args.DisplayName, invalidUserDisplayNameFormatHint),
 					WrappedError: err,
 				}
 			}

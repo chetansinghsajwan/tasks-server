@@ -21,10 +21,10 @@ type Store interface {
 	UpdateList(ctx context.Context, id uint64, args UpdateListParams) *StoreError
 	DeleteList(ctx context.Context, id uint64) *StoreError
 
-	GetTask(ctx context.Context, id TaskID) (*Task, *StoreError)
-	CreateTask(ctx context.Context, args CreateTaskParams) (TaskID, *StoreError)
-	UpdateTask(ctx context.Context, id TaskID, args UpdateTaskParams) *StoreError
-	DeleteTask(ctx context.Context, id TaskID) *StoreError
+	GetTask(ctx context.Context, id uint64) (*Task, *StoreError)
+	CreateTask(ctx context.Context, args CreateTaskParams) (uint64, *StoreError)
+	UpdateTask(ctx context.Context, id uint64, args UpdateTaskParams) *StoreError
+	DeleteTask(ctx context.Context, id uint64) *StoreError
 
 	GetListAccess(ctx context.Context, args GetListAccessParams) (*ListAccess, *StoreError)
 	AddListAccess(ctx context.Context, args AddListAccessParams) *StoreError

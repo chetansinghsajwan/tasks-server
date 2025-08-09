@@ -13,7 +13,7 @@ import (
 )
 
 func (st PostgresStore) CreateTask(ctx context.Context,
-	args store.CreateTaskParams) (store.TaskID, *store.StoreError) {
+	args store.CreateTaskParams) (uint64, *store.StoreError) {
 
 	const query = `
 		insert into tasks(list_id, title, description, priority, due_date, assignee, labels)
@@ -21,13 +21,13 @@ func (st PostgresStore) CreateTask(ctx context.Context,
 		returning id
 	`
 
-	var taskID store.TaskID
+	var taskID uint64
 	var row = st.Pool.QueryRow(ctx, query, args.ListID, args.Title, args.Description, args.Priority, args.DueDate, args.Labels)
 	var err = row.Scan(&taskID)
 
 	if err != nil {
 
-		return store.NullTaskID(), &store.StoreError{
+		return 0, &store.StoreError{
 			Code:         errorcodes.Unknown,
 			Msg:          "unknown error",
 			WrappedError: err,
@@ -38,7 +38,7 @@ func (st PostgresStore) CreateTask(ctx context.Context,
 }
 
 func (st PostgresStore) GetTask(ctx context.Context,
-	id store.TaskID) (*store.Task, *store.StoreError) {
+	id uint64) (*store.Task, *store.StoreError) {
 
 	const query = `
 		select id, list_id, title, description, priority, due_date, assignee, labels
@@ -72,7 +72,7 @@ func (st PostgresStore) GetTask(ctx context.Context,
 	return &task, nil
 }
 
-func (st PostgresStore) UpdateTask(ctx context.Context, id store.TaskID, args store.UpdateTaskParams) *store.StoreError {
+func (st PostgresStore) UpdateTask(ctx context.Context, id uint64, args store.UpdateTaskParams) *store.StoreError {
 
 	var queryBuilder strings.Builder
 	queryBuilder.WriteString("update tasks set")
@@ -168,7 +168,7 @@ func (st PostgresStore) UpdateTask(ctx context.Context, id store.TaskID, args st
 }
 
 func (st PostgresStore) DeleteTask(ctx context.Context,
-	id store.TaskID) *store.StoreError {
+	id uint64) *store.StoreError {
 
 	const query = `
 		delete from tasks

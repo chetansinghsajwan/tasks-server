@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"tasks/store"
+	"tasks/utils"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -53,7 +54,7 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	var taskID store.TaskID
+	var taskID uint64
 	var serr *store.StoreError
 	taskID, serr = ST.CreateTask(ctx, store.CreateTaskParams{
 		ListID:      body.ListID,
@@ -85,7 +86,7 @@ func GetTask(c *gin.Context) {
 
 	defer cancel()
 
-	var taskID, err = store.ParseTaskID(c.Param("id"))
+	var taskID, err = utils.ParseUint64(c.Param("id"))
 	if err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -118,9 +119,9 @@ func UpdateTask(c *gin.Context) {
 
 	defer cancel()
 
-	var taskID store.TaskID
+	var taskID uint64
 	var err error
-	if taskID, err = store.ParseTaskID(c.Param("id")); err != nil {
+	if taskID, err = utils.ParseUint64(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -167,9 +168,9 @@ func DeleteTask(c *gin.Context) {
 
 	defer cancel()
 
-	var taskID store.TaskID
+	var taskID uint64
 	var err error
-	if taskID, err = store.ParseTaskID(c.Param("id")); err != nil {
+	if taskID, err = utils.ParseUint64(c.Param("id")); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
