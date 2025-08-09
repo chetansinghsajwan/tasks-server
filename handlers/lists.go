@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"tasks/store"
+	"tasks/services"
 	"tasks/utils"
 	"time"
 
@@ -48,17 +48,29 @@ func CreateList(c *gin.Context) {
 
 	// Perform creation
 	var listID uint64
-	var serr *store.StoreError
-	listID, serr = ST.CreateList(ctx, store.CreateListParams{
-		Name: body.Name,
-	})
+	var serr *services.ServiceError
+	listID, serr = services.CreateList(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		services.CreateListParams{
+			Name: body.Name,
+		},
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
@@ -86,16 +98,28 @@ func GetList(c *gin.Context) {
 	}
 
 	// Get list
-	var list *store.List
-	var serr *store.StoreError
-	list, serr = ST.GetList(ctx, listID)
+	var list *services.List
+	var serr *services.ServiceError
+	list, serr = services.GetList(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		listID,
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -133,16 +157,29 @@ func UpdateList(c *gin.Context) {
 	}
 
 	// Update the list
-	var serr *store.StoreError = ST.UpdateList(ctx, listID, store.UpdateListParams{
-		Name: body.Name,
-	})
+	var serr *services.ServiceError = services.UpdateList(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		listID,
+		services.UpdateListParams{
+			Name: body.Name,
+		},
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.Status(http.StatusOK)
@@ -167,11 +204,20 @@ func DeleteList(c *gin.Context) {
 	}
 
 	// Perform deletion
-	var serr *store.StoreError = ST.DeleteList(ctx, listID)
+	var serr *services.ServiceError = services.DeleteList(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		listID,
+	)
+
 	if serr != nil {
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
+			"error": gin.H{
+				"msg": "internal server error",
+			},
 		})
 		return
 	}

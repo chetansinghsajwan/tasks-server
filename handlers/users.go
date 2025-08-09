@@ -152,7 +152,7 @@ func CreateUser(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusCreated, nil)
+	c.Status(http.StatusCreated)
 }
 
 func GetUser(c *gin.Context) {
@@ -262,7 +262,7 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg": fmt.Sprintf("user with id '%s' already exists", body.ID),
+					"msg": fmt.Sprintf("user with id '%s' already exists", *body.ID),
 				},
 			})
 			return
@@ -271,7 +271,7 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg": fmt.Sprintf("user with email '%s' already exists", body.Email),
+					"msg": fmt.Sprintf("user with email '%s' already exists", *body.Email),
 				},
 			})
 			return
@@ -280,7 +280,7 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg":  fmt.Sprintf("user id '%s' format is invalid", body.ID),
+					"msg":  fmt.Sprintf("user id '%s' format is invalid", *body.ID),
 					"hint": invalidUserIDFormatHint,
 				},
 			})
@@ -290,7 +290,7 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg":  fmt.Sprintf("user email '%s' format is invalid", body.Email),
+					"msg":  fmt.Sprintf("user email '%s' format is invalid", *body.Email),
 					"hint": invalidUserEmailFormatHint,
 				},
 			})
@@ -300,7 +300,7 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg":  fmt.Sprintf("user full name '%s' format is invalid", body.FullName),
+					"msg":  fmt.Sprintf("user full name '%s' format is invalid", *body.FullName),
 					"hint": invalidUserFullNameFormatHint,
 				},
 			})
