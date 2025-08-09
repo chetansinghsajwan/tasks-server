@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"tasks/store"
+	"tasks/services"
 	"tasks/utils"
 	"time"
 
@@ -55,23 +55,35 @@ func CreateTask(c *gin.Context) {
 	}
 
 	var taskID uint64
-	var serr *store.StoreError
-	taskID, serr = ST.CreateTask(ctx, store.CreateTaskParams{
-		ListID:      body.ListID,
-		Title:       body.Title,
-		Description: body.Description,
-		Priority:    body.Priority,
-		DueDate:     body.DueDate,
-		Assignee:    body.Assignee,
-		Labels:      body.Labels,
-	})
+	var serr *services.ServiceError
+	taskID, serr = services.CreateTask(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		services.CreateTaskParams{
+			ListID:      body.ListID,
+			Title:       body.Title,
+			Description: body.Description,
+			Priority:    body.Priority,
+			DueDate:     body.DueDate,
+			Assignee:    body.Assignee,
+			Labels:      body.Labels,
+		},
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
@@ -95,16 +107,28 @@ func GetTask(c *gin.Context) {
 		return
 	}
 
-	var task *store.Task
-	var serr *store.StoreError
-	task, serr = ST.GetTask(ctx, taskID)
+	var task *services.Task
+	var serr *services.ServiceError
+	task, serr = services.GetTask(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		taskID,
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -138,22 +162,34 @@ func UpdateTask(c *gin.Context) {
 		return
 	}
 
-	var serr *store.StoreError = ST.UpdateTask(ctx, taskID, store.UpdateTaskParams{
-		ListID:      body.ListID,
-		Title:       body.Title,
-		Description: body.Description,
-		Priority:    body.Priority,
-		DueDate:     body.DueDate,
-		Assignee:    body.Assignee,
-		Labels:      body.Labels,
-	})
+	var serr *services.ServiceError = services.UpdateTask(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		taskID, services.UpdateTaskParams{
+			ListID:      body.ListID,
+			Title:       body.Title,
+			Description: body.Description,
+			Priority:    body.Priority,
+			DueDate:     body.DueDate,
+			Assignee:    body.Assignee,
+			Labels:      body.Labels,
+		},
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -178,14 +214,26 @@ func DeleteTask(c *gin.Context) {
 		return
 	}
 
-	var serr *store.StoreError = ST.DeleteTask(ctx, taskID)
+	var serr *services.ServiceError = services.DeleteTask(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		taskID,
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.Status(http.StatusOK)
