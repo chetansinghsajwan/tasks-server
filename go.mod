@@ -6,7 +6,6 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jackc/pgx/v5 v5.7.5
-	github.com/lib/pq v1.10.9
 	golang.org/x/crypto v0.40.0
 )
 

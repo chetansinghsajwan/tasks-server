@@ -20,6 +20,8 @@ const (
 	AccessTokenCookieLifetime = 3600
 )
 
+var ST store.Store
+
 func GenerateToken(userID string) (string, error) {
 
 	var claims = jwt.NewWithClaims(

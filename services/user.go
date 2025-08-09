@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"tasks/errorcodes"
 	"tasks/store"
 
@@ -13,11 +12,15 @@ const (
 	BcryptUserEncryptionCost = bcrypt.DefaultCost
 )
 
+type ServiceError struct {
+	Code errorcodes.Code
+}
+
 var ST store.Store
 
 type ServiceContext struct {
-	ctx    context.Context
-	string string
+	Ctx    context.Context
+	UserID string
 }
 
 type User struct {
@@ -42,10 +45,10 @@ type UpdateUserParams struct {
 	DisplayName **string
 }
 
-func CreateUser(ctx ServiceContext, args CreateUserParams) error {
+func CreateUser(ctx ServiceContext, args CreateUserParams) *ServiceError {
 
 	var serr *store.StoreError
-	serr = ST.CreateUser(ctx.ctx, store.CreateUserParams{
+	serr = ST.CreateUser(ctx.Ctx, store.CreateUserParams{
 		ID:          args.ID,
 		Email:       args.Email,
 		FullName:    args.FullName,
@@ -55,18 +58,24 @@ func CreateUser(ctx ServiceContext, args CreateUserParams) error {
 	if serr != nil {
 
 		switch serr.Code {
+
 		case errorcodes.UserIDNull,
 			errorcodes.UserIDAlreadyExists,
-			errorcodes.UserIDFormat,
+			errorcodes.InvalidUserIDFormat,
 			errorcodes.UserEmailNull,
 			errorcodes.UserEmailAlreadyExists,
-			errorcodes.UserEmailFormat,
-			errorcodes.UserFullNameFormat,
-			errorcodes.UserDisplayNameFormat:
-			return errors.New(serr.Msg)
+			errorcodes.InvalidUserEmailFormat,
+			errorcodes.InvalidUserFullNameFormat,
+			errorcodes.InvalidUserDisplayNameFormat:
+
+			return &ServiceError{
+				Code: serr.Code,
+			}
 
 		default:
-			return errors.New("internal server error")
+			return &ServiceError{
+				Code: errorcodes.Internal,
+			}
 		}
 	}
 
@@ -78,35 +87,52 @@ func CreateUser(ctx ServiceContext, args CreateUserParams) error {
 
 	if err != nil {
 
-		return errors.New(err.Error())
+		return &ServiceError{
+			Code: errorcodes.Internal,
+		}
 	}
 
 	// Create user secrets
-	serr = ST.CreateUserSecret(ctx.ctx, store.CreateUserSecretParams{
+	serr = ST.CreateUserSecret(ctx.Ctx, store.CreateUserSecretParams{
 		ID:   args.ID,
 		Pass: string(hashedPass),
 	})
 
 	if serr != nil {
 
-		return errors.New(serr.Msg)
+		switch serr.Code {
+
+		case errorcodes.InvalidUserSecretPassFormat:
+			return &ServiceError{
+				Code: serr.Code,
+			}
+
+		default:
+			return &ServiceError{
+				Code: errorcodes.Internal,
+			}
+		}
 	}
 
 	return nil
 }
 
-func GetUser(ctx ServiceContext, id string) (*User, error) {
+func GetUser(ctx ServiceContext, id string) (*User, *ServiceError) {
 
 	var user *store.User
 	var serr *store.StoreError
-	if user, serr = ST.GetUser(ctx.ctx, id); serr != nil {
+	if user, serr = ST.GetUser(ctx.Ctx, id); serr != nil {
 
 		switch serr.Code {
 		case errorcodes.UserNotFound:
-			return nil, errors.New(serr.Msg)
+			return nil, &ServiceError{
+				Code: serr.Code,
+			}
 
 		default:
-			return nil, errors.New("internal server error")
+			return nil, &ServiceError{
+				Code: errorcodes.Internal,
+			}
 		}
 	}
 
@@ -117,9 +143,9 @@ func GetUser(ctx ServiceContext, id string) (*User, error) {
 	}, nil
 }
 
-func UpdateUser(ctx ServiceContext, id string, args UpdateUserParams) error {
+func UpdateUser(ctx ServiceContext, id string, args UpdateUserParams) *ServiceError {
 
-	var serr *store.StoreError = ST.UpdateUser(ctx.ctx, id, store.UpdateUserParams{
+	var serr *store.StoreError = ST.UpdateUser(ctx.Ctx, id, store.UpdateUserParams{
 		ID:          &args.ID,
 		Email:       &args.Email,
 		FullName:    &args.FullName,
@@ -132,33 +158,41 @@ func UpdateUser(ctx ServiceContext, id string, args UpdateUserParams) error {
 		case errorcodes.UserNotFound,
 			errorcodes.UserIDNull,
 			errorcodes.UserIDAlreadyExists,
-			errorcodes.UserIDFormat,
+			errorcodes.InvalidUserIDFormat,
 			errorcodes.UserEmailNull,
 			errorcodes.UserEmailAlreadyExists,
-			errorcodes.UserEmailFormat,
-			errorcodes.UserFullNameFormat,
-			errorcodes.UserDisplayNameFormat:
+			errorcodes.InvalidUserEmailFormat,
+			errorcodes.InvalidUserFullNameFormat,
+			errorcodes.InvalidUserDisplayNameFormat:
 
-			return errors.New(serr.Msg)
+			return &ServiceError{
+				Code: serr.Code,
+			}
 		}
 
-		return errors.New(serr.Msg)
+		return &ServiceError{
+			Code: errorcodes.Internal,
+		}
 	}
 
 	return nil
 }
 
-func DeleteUser(ctx ServiceContext, id string) error {
+func DeleteUser(ctx ServiceContext, id string) *ServiceError {
 
 	var serr *store.StoreError
-	if serr = ST.DeleteUser(ctx.ctx, id); serr != nil {
+	if serr = ST.DeleteUser(ctx.Ctx, id); serr != nil {
 
-		return errors.New(serr.Msg)
+		return &ServiceError{
+			Code: errorcodes.Internal,
+		}
 	}
 
-	if serr = ST.DeleteUserSecret(ctx.ctx, id); serr != nil {
+	if serr = ST.DeleteUserSecret(ctx.Ctx, id); serr != nil {
 
-		return errors.New(serr.Msg)
+		return &ServiceError{
+			Code: errorcodes.Internal,
+		}
 	}
 
 	return nil

@@ -2,47 +2,47 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"tasks/errorcodes"
-	"tasks/store"
+	"tasks/services"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
-
-const (
-	CreateUserRequestTimeout = time.Second * 5000000000
-	GetUserRequestTimeout    = time.Second * 5000000000
-	UpdateUserRequestTimeout = time.Second * 5000000000
-	DeleteUserRequestTimeout = time.Second * 5000000000
-	BcryptUserEncryptionCost = bcrypt.DefaultCost
-)
-
-var ST store.Store
 
 type CreateUserBody struct {
 	ID          string  `json:"id"`
 	Pass        string  `json:"pass"`
+	Email       string  `json:"email"`
 	FullName    string  `json:"full_name"`
 	DisplayName *string `json:"display_name"`
-	Email       string  `json:"email"`
 }
 
 type UpdateUserBody struct {
 	ID          *string `json:"id"`
-	Pass        *string `json:"pass"`
+	Email       *string `json:"email"`
 	FullName    *string `json:"full_name"`
 	DisplayName *string `json:"display_name"`
-	Email       *string `json:"email"`
 }
+
+const (
+	createUserRequestTimeout                = time.Second * 5000000000
+	getUserRequestTimeout                   = time.Second * 5000000000
+	updateUserRequestTimeout                = time.Second * 5000000000
+	deleteUserRequestTimeout                = time.Second * 5000000000
+	invalidUserIDFormatHint          string = ""
+	invalidUserEmailFormatHint       string = ""
+	invalidUserFullNameFormatHint    string = ""
+	invalidUserDisplayNameFormatHint string = ""
+)
 
 func CreateUser(c *gin.Context) {
 
 	// Setup context
 	var ctx, cancel = context.WithTimeout(
-		context.Background(), CreateUserRequestTimeout,
+		context.Background(), createUserRequestTimeout,
 	)
 
 	defer cancel()
@@ -58,61 +58,99 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	var serr *store.StoreError = ST.CreateUser(ctx, store.CreateUserParams{
-		ID:          body.ID,
-		Email:       body.Email,
-		FullName:    body.FullName,
-		DisplayName: body.DisplayName,
-	})
+	var serr *services.ServiceError = services.CreateUser(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		services.CreateUserParams{
+			ID:          body.ID,
+			Email:       body.Email,
+			FullName:    body.FullName,
+			DisplayName: body.DisplayName,
+		},
+	)
 
 	if serr != nil {
 
 		switch serr.Code {
-		case errorcodes.UserIDNull,
-			errorcodes.UserIDAlreadyExists,
-			errorcodes.UserIDFormat,
-			errorcodes.UserEmailNull,
-			errorcodes.UserEmailAlreadyExists,
-			errorcodes.UserEmailFormat,
-			errorcodes.UserFullNameFormat,
-			errorcodes.UserDisplayNameFormat:
+		case errorcodes.UserIDNull:
 
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": serr.Msg,
+				"error": gin.H{
+					"msg": "user id is null",
+				},
+			})
+			return
+
+		case errorcodes.UserIDAlreadyExists:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg": fmt.Sprintf("user with id '%s' already exists", body.ID),
+				},
+			})
+			return
+
+		case errorcodes.UserEmailAlreadyExists:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg": fmt.Sprintf("user with email '%s' already exists", body.Email),
+				},
+			})
+			return
+
+		case errorcodes.InvalidUserIDFormat:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg":  fmt.Sprintf("user id '%s' format is invalid", body.ID),
+					"hint": invalidUserIDFormatHint,
+				},
+			})
+			return
+
+		case errorcodes.InvalidUserEmailFormat:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg":  fmt.Sprintf("user email '%s' format is invalid", body.Email),
+					"hint": invalidUserEmailFormatHint,
+				},
+			})
+			return
+
+		case errorcodes.InvalidUserFullNameFormat:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg":  fmt.Sprintf("user full name '%s' format is invalid", body.FullName),
+					"hint": invalidUserFullNameFormatHint,
+				},
+			})
+			return
+
+		case errorcodes.InvalidUserDisplayNameFormat:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg":  fmt.Sprintf("user display name '%s' format is invalid", *body.DisplayName),
+					"hint": invalidUserDisplayNameFormatHint,
+				},
+			})
+			return
+
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
 			})
 			return
 		}
-
-		c.Status(http.StatusInternalServerError)
-		return
 	}
-
-	// // Encrypt the password
-	// var hashedPass []byte
-	// hashedPass, err = bcrypt.GenerateFromPassword(
-	// 	[]byte(body.Pass), BcryptUserEncryptionCost)
-
-	// if err != nil {
-
-	// 	c.JSON(http.StatusInternalServerError, gin.H{
-	// 		"error": err.Error(),
-	// 	})
-	// 	return
-	// }
-
-	// // Create user secrets
-	// var createSecretParams = sqlc.CreateSecretParams{
-	// 	Key:   body.ID,
-	// 	Scope: "user-login",
-	// 	Pass:  string(hashedPass),
-	// }
-	// if err = db.Queries.CreateSecret(ctx, createSecretParams); err != nil {
-
-	// 	c.JSON(http.StatusInternalServerError, gin.H{
-	// 		"error": err.Error(),
-	// 	})
-	// 	return
-	// }
 
 	c.JSON(http.StatusCreated, nil)
 }
@@ -120,37 +158,43 @@ func CreateUser(c *gin.Context) {
 func GetUser(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(
-		context.Background(), GetUserRequestTimeout,
+		context.Background(), getUserRequestTimeout,
 	)
 
 	defer cancel()
 
-	var userID string = c.Param("id")
-	if len(strings.TrimSpace(userID)) == 0 {
+	var userID = c.Param("id")
 
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "user id must not be empty",
-		})
-		return
-	}
+	var user *services.User
+	var serr *services.ServiceError
+	user, serr = services.GetUser(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		userID,
+	)
 
-	var user *store.User
-	var serr *store.StoreError
-	if user, serr = ST.GetUser(ctx, userID); serr != nil {
+	if serr != nil {
 
 		switch serr.Code {
 		case errorcodes.UserNotFound:
 
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": serr.Msg,
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": gin.H{
+					"msg": fmt.Sprintf("user with id '%s' not found", userID),
+				},
+			})
+			return
+
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
 			})
 			return
 		}
-
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Error(),
-		})
-		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -161,7 +205,7 @@ func GetUser(c *gin.Context) {
 func UpdateUser(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(
-		context.Background(), UpdateUserRequestTimeout,
+		context.Background(), updateUserRequestTimeout,
 	)
 
 	defer cancel()
@@ -170,7 +214,9 @@ func UpdateUser(c *gin.Context) {
 	if len(strings.TrimSpace(userID)) == 0 {
 
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "user id must not be empty",
+			"error": gin.H{
+				"msg": "user id must not be empty",
+			},
 		})
 		return
 	}
@@ -186,36 +232,99 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	var serr *store.StoreError
-	var args = store.UpdateUserParams{
-		ID:          &body.ID,
-		Email:       &body.Email,
-		FullName:    &body.FullName,
-		DisplayName: &body.DisplayName,
-	}
-	if serr = ST.UpdateUser(ctx, userID, args); serr != nil {
+	var serr *services.ServiceError = services.UpdateUser(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		userID,
+		services.UpdateUserParams{
+			ID:          body.ID,
+			Email:       body.Email,
+			FullName:    body.FullName,
+			DisplayName: &body.DisplayName,
+		},
+	)
+
+	if serr != nil {
 
 		switch serr.Code {
-		case errorcodes.UserNotFound,
-			errorcodes.UserIDNull,
-			errorcodes.UserIDAlreadyExists,
-			errorcodes.UserIDFormat,
-			errorcodes.UserEmailNull,
-			errorcodes.UserEmailAlreadyExists,
-			errorcodes.UserEmailFormat,
-			errorcodes.UserFullNameFormat,
-			errorcodes.UserDisplayNameFormat:
+		case errorcodes.UserIDNull:
 
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": serr.Msg,
+				"error": gin.H{
+					"msg": "user id is null",
+				},
+			})
+			return
+
+		case errorcodes.UserIDAlreadyExists:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg": fmt.Sprintf("user with id '%s' already exists", body.ID),
+				},
+			})
+			return
+
+		case errorcodes.UserEmailAlreadyExists:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg": fmt.Sprintf("user with email '%s' already exists", body.Email),
+				},
+			})
+			return
+
+		case errorcodes.InvalidUserIDFormat:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg":  fmt.Sprintf("user id '%s' format is invalid", body.ID),
+					"hint": invalidUserIDFormatHint,
+				},
+			})
+			return
+
+		case errorcodes.InvalidUserEmailFormat:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg":  fmt.Sprintf("user email '%s' format is invalid", body.Email),
+					"hint": invalidUserEmailFormatHint,
+				},
+			})
+			return
+
+		case errorcodes.InvalidUserFullNameFormat:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg":  fmt.Sprintf("user full name '%s' format is invalid", body.FullName),
+					"hint": invalidUserFullNameFormatHint,
+				},
+			})
+			return
+
+		case errorcodes.InvalidUserDisplayNameFormat:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"msg":  fmt.Sprintf("user display name '%s' format is invalid", *body.DisplayName),
+					"hint": invalidUserDisplayNameFormatHint,
+				},
+			})
+			return
+
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
 			})
 			return
 		}
-
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Error(),
-		})
-		return
 	}
 
 	c.Status(http.StatusOK)
@@ -224,7 +333,7 @@ func UpdateUser(c *gin.Context) {
 func DeleteUser(c *gin.Context) {
 
 	var ctx, cancel = context.WithTimeout(
-		context.Background(), DeleteUserRequestTimeout,
+		context.Background(), deleteUserRequestTimeout,
 	)
 
 	defer cancel()
@@ -233,27 +342,42 @@ func DeleteUser(c *gin.Context) {
 	if len(strings.TrimSpace(userID)) == 0 {
 
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "user id must not be empty",
+			"error": gin.H{
+				"msg": "user id must not be empty",
+			},
 		})
 		return
 	}
 
-	var serr *store.StoreError
-	if serr = ST.DeleteUser(ctx, userID); serr != nil {
+	var serr *services.ServiceError = services.DeleteUser(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		userID,
+	)
+
+	if serr != nil {
 
 		switch serr.Code {
 		case errorcodes.UserNotFound:
 
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": serr.Msg,
+				"error": gin.H{
+					"msg": fmt.Sprintf("user with id '%s' not found", userID),
+				},
+			})
+			return
+
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
 			})
 			return
 		}
-
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
 	}
 
 	c.Status(http.StatusOK)

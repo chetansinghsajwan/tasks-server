@@ -132,7 +132,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_id_validation" {
 
 				return &store.StoreError{
-					Code:         errorcodes.UserIDFormat,
+					Code:         errorcodes.InvalidUserIDFormat,
 					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", args.ID, invalidUserIDFormatHint),
 					WrappedError: err,
 				}
@@ -160,7 +160,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_email_validation" {
 
 				return &store.StoreError{
-					Code:         errorcodes.UserEmailFormat,
+					Code:         errorcodes.InvalidUserEmailFormat,
 					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", args.Email, invalidUserEmailFormatHint),
 					WrappedError: err,
 				}
@@ -178,7 +178,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_full_name_validation" {
 
 				return &store.StoreError{
-					Code:         errorcodes.UserFullNameFormat,
+					Code:         errorcodes.InvalidUserFullNameFormat,
 					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", args.FullName, invalidUserFullNameFormatHint),
 					WrappedError: err,
 				}
@@ -187,7 +187,7 @@ func (st PostgresStore) CreateUser(ctx context.Context, args store.CreateUserPar
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_display_name_validation" {
 
 				return &store.StoreError{
-					Code:         errorcodes.UserDisplayNameFormat,
+					Code:         errorcodes.InvalidUserDisplayNameFormat,
 					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", args.DisplayName, invalidUserDisplayNameFormatHint),
 					WrappedError: err,
 				}
@@ -278,7 +278,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_id_validation" {
 
 				return &store.StoreError{
-					Code:         errorcodes.UserIDFormat,
+					Code:         errorcodes.InvalidUserIDFormat,
 					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", **args.ID, invalidUserIDFormatHint),
 					WrappedError: err,
 				}
@@ -306,7 +306,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_email_validation" {
 
 				return &store.StoreError{
-					Code:         errorcodes.UserEmailFormat,
+					Code:         errorcodes.InvalidUserEmailFormat,
 					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", **args.Email, invalidUserEmailFormatHint),
 					WrappedError: err,
 				}
@@ -324,7 +324,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_full_name_validation" {
 
 				return &store.StoreError{
-					Code:         errorcodes.UserFullNameFormat,
+					Code:         errorcodes.InvalidUserFullNameFormat,
 					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", **args.FullName, invalidUserFullNameFormatHint),
 					WrappedError: err,
 				}
@@ -333,7 +333,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 			if pgerr.Code == pgerrcode.CheckViolation && pgerr.ConstraintName == "users_display_name_validation" {
 
 				return &store.StoreError{
-					Code:         errorcodes.UserDisplayNameFormat,
+					Code:         errorcodes.InvalidUserDisplayNameFormat,
 					Msg:          fmt.Sprintf("user display name '%s' format is not correct. hint: %s", **args.DisplayName, invalidUserDisplayNameFormatHint),
 					WrappedError: err,
 				}

@@ -4,6 +4,7 @@ type Code uint32
 
 const (
 	Unknown Code = iota
+	Internal
 	TxCreate
 	TxCommit
 
@@ -11,12 +12,12 @@ const (
 	UserNotFound
 	UserIDNull
 	UserIDAlreadyExists
-	UserIDFormat
+	InvalidUserIDFormat
 	UserEmailNull
 	UserEmailAlreadyExists
-	UserEmailFormat
-	UserFullNameFormat
-	UserDisplayNameFormat
+	InvalidUserEmailFormat
+	InvalidUserFullNameFormat
+	InvalidUserDisplayNameFormat
 
 	// List related errors
 	ListNotFound
