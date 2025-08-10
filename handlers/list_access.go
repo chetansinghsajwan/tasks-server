@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"tasks/store"
+	"tasks/services"
 	"tasks/utils"
 
 	"github.com/gin-gonic/gin"
@@ -15,12 +15,12 @@ type GetListAccessRequest struct {
 
 type AddListAccessRequest struct {
 	UserID string
-	Access []store.ListAccessType
+	Access []services.ListAccessType
 }
 
 type RemoveListAccessRequest struct {
 	UserID string
-	Access []store.ListAccessType
+	Access []services.ListAccessType
 }
 
 func GetListAccess(c *gin.Context) {
@@ -52,23 +52,39 @@ func GetListAccess(c *gin.Context) {
 	}
 
 	// Get list access
-	var listAccess *store.ListAccess
-	var serr *store.StoreError
-	listAccess, serr = ST.GetListAccess(ctx, store.GetListAccessParams{
-		UserID: body.UserID,
-		ListID: listID,
-	})
+	var listAccess *services.ListAccess
+	var serr *services.ServiceError
+	listAccess, serr = services.GetListAccess(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		services.GetListAccessParams{
+			UserID: body.UserID,
+			ListID: listID,
+		},
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"access": *listAccess,
+		"access": gin.H{
+			"user_id":  listAccess.UserID,
+			"list_id":  listAccess.ListID,
+			"accesses": listAccess.Access,
+		},
 	})
 }
 
@@ -101,18 +117,30 @@ func AddListAccess(c *gin.Context) {
 	}
 
 	// Add list access
-	var serr *store.StoreError = ST.AddListAccess(ctx, store.AddListAccessParams{
-		UserID: body.UserID,
-		ListID: listID,
-		Access: body.Access,
-	})
+	var serr *services.ServiceError = services.AddListAccess(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		services.AddListAccessParams{
+			UserID: body.UserID,
+			ListID: listID,
+			Access: body.Access,
+		},
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.Status(http.StatusOK)
@@ -147,18 +175,30 @@ func RemoveListAccess(c *gin.Context) {
 	}
 
 	// Add list access
-	var serr *store.StoreError = ST.RemoveListAccess(ctx, store.RemoveListAccessParams{
-		UserID: &body.UserID,
-		ListID: &listID,
-		Access: &body.Access,
-	})
+	var serr *services.ServiceError = services.RemoveListAccess(
+		services.ServiceContext{
+			Ctx:    ctx,
+			UserID: c.GetString("userid"),
+		},
+		services.RemoveListAccessParams{
+			UserID: &body.UserID,
+			ListID: &listID,
+			Access: &body.Access,
+		},
+	)
 
 	if serr != nil {
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": serr.Msg,
-		})
-		return
+		switch serr.Code {
+		default:
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": gin.H{
+					"msg": "internal server error",
+				},
+			})
+			return
+		}
 	}
 
 	c.Status(http.StatusOK)

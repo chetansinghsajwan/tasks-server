@@ -3,6 +3,7 @@ package main
 import (
 	"tasks/db"
 	"tasks/handlers"
+	"tasks/services"
 	"tasks/store/pg"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,7 @@ func main() {
 
 	db.Init()
 
-	handlers.ST = pg.PostgresStore{
+	services.ST = pg.PostgresStore{
 		Pool: db.Pool,
 	}
 

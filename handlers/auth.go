@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"tasks/errorcodes"
 	"tasks/services"
-	"tasks/store"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,8 +19,6 @@ type LoginRequest struct {
 const (
 	LoginRequestTimeout = time.Second * 5
 )
-
-var ST store.Store
 
 func AuthenticateMiddleware(c *gin.Context) {
 
