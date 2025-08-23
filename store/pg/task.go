@@ -56,7 +56,7 @@ func (st PostgresStore) GetTask(ctx context.Context,
 		if errors.Unwrap(err) == sql.ErrNoRows {
 
 			return nil, &store.StoreError{
-				Code:         errorcodes.TaskNotFoundCode,
+				Code:         errorcodes.TaskNotFound,
 				Msg:          fmt.Sprintf("task with id '%v' not found", id),
 				WrappedError: err,
 			}
@@ -158,7 +158,7 @@ func (st PostgresStore) UpdateTask(ctx context.Context, id uint64, args store.Up
 	if !cmd.Update() {
 
 		return &store.StoreError{
-			Code:         errorcodes.TaskNotFoundCode,
+			Code:         errorcodes.TaskNotFound,
 			Msg:          fmt.Sprintf("task with id '%v' not found", id),
 			WrappedError: err,
 		}
@@ -189,7 +189,7 @@ func (st PostgresStore) DeleteTask(ctx context.Context,
 	if !cmd.Delete() {
 
 		return &store.StoreError{
-			Code:         errorcodes.TaskNotFoundCode,
+			Code:         errorcodes.TaskNotFound,
 			Msg:          fmt.Sprintf("task with id '%v' not found", id),
 			WrappedError: err,
 		}
