@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"tasks/errorcodes"
 	"tasks/store"
 	"time"
@@ -69,8 +70,18 @@ func GetTask(ctx ServiceContext, id uint64) (*Task, *ServiceError) {
 
 	if serr != nil {
 
-		return nil, &ServiceError{
-			Code: errorcodes.Internal,
+		switch serr.Code {
+		case errorcodes.TaskNotFound:
+			return nil, &ServiceError{
+				Code: serr.Code,
+			}
+
+		default:
+			fmt.Printf("task service: %v", serr.Code)
+
+			return nil, &ServiceError{
+				Code: errorcodes.Internal,
+			}
 		}
 	}
 

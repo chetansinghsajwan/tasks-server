@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"tasks/errorcodes"
 	"tasks/services"
 	"tasks/utils"
 	"time"
@@ -120,6 +121,16 @@ func GetTask(c *gin.Context) {
 	if serr != nil {
 
 		switch serr.Code {
+
+		case errorcodes.TaskNotFound:
+
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": gin.H{
+					"msg": "task not found",
+				},
+			})
+			return
+
 		default:
 
 			c.JSON(http.StatusInternalServerError, gin.H{
