@@ -196,7 +196,8 @@ func GetUser(c *gin.Context) {
 
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": gin.H{
-					"msg": fmt.Sprintf("user with id '%s' not found", userID),
+					"code": errorcodes.UserNotFound,
+					"msg":  fmt.Sprintf("user with id '%s' not found", userID),
 				},
 			})
 			return
@@ -204,15 +205,26 @@ func GetUser(c *gin.Context) {
 		default:
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": gin.H{
-					"msg": "internal server error",
+					"code": errorcodes.Internal,
+					"msg":  "internal server error",
 				},
 			})
 			return
 		}
 	}
 
+	var userDisplayName = ""
+	if user.DisplayName != nil {
+		userDisplayName = *user.DisplayName
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"user": user,
+		"user": gin.H{
+			"id":           user.ID,
+			"email":        user.Email,
+			"full_name":    user.FullName,
+			"display_name": userDisplayName,
+		},
 	})
 }
 
@@ -376,18 +388,22 @@ func DeleteUser(c *gin.Context) {
 		switch serr.Code {
 		case errorcodes.UserNotFound:
 
-			c.JSON(http.StatusBadRequest, gin.H{
+			c.JSON(http.StatusNotFound, gin.H{
 				"error": gin.H{
-					"msg": fmt.Sprintf("user with id '%s' not found", userID),
+					"code": errorcodes.UserNotFound,
+					"msg":  fmt.Sprintf("user with id '%s' not found", userID),
 				},
 			})
 			return
 
 		default:
 
+			log.Printf("HANDLER: DeleteUser: unexpected error: %v", serr)
+
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": gin.H{
-					"msg": "internal server error",
+					"code": errorcodes.Internal,
+					"msg":  "internal server error",
 				},
 			})
 			return

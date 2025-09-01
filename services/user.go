@@ -144,6 +144,7 @@ func GetUser(ctx ServiceContext, id string) (*User, *ServiceError) {
 
 	return &User{
 		ID:          user.ID,
+		Email:       user.Email,
 		FullName:    user.FullName,
 		DisplayName: user.DisplayName,
 	}, nil
@@ -189,17 +190,20 @@ func DeleteUser(ctx ServiceContext, id string) *ServiceError {
 	var serr *store.StoreError
 	if serr = ST.DeleteUser(ctx.Ctx, id); serr != nil {
 
-		return &ServiceError{
-			Code: errorcodes.Internal,
+		switch serr.Code {
+		case errorcodes.UserNotFound:
+			return &ServiceError{
+				Code: serr.Code,
+			}
+
+		default:
+			return &ServiceError{
+				Code: errorcodes.Internal,
+			}
 		}
 	}
 
-	if serr = ST.DeleteUserSecret(ctx.Ctx, id); serr != nil {
-
-		return &ServiceError{
-			Code: errorcodes.Internal,
-		}
-	}
+	// We don't need to delete the secret, because the user-secret relation includes cascade.
 
 	return nil
 }

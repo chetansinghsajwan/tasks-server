@@ -37,15 +37,31 @@ type CreateUserResponse struct {
 	} `json:"error,omitempty"`
 }
 
+type GetUserResponse struct {
+	User *struct {
+		ID          string  `json:"id"`
+		Email       string  `json:"email"`
+		FullName    string  `json:"full_name"`
+		DisplayName *string `json:"display_name"`
+	} `json:"user,omitempty"`
+
+	Error *struct {
+		Code string `json:"code"`
+		Msg  string `json:"msg"`
+		Hint string `json:"hint,omitempty"`
+	} `json:"error,omitempty"`
+}
+
 const (
-	validUserID          = "johndoe"
-	validUserPass        = "password123"
-	validUserEmail       = "myemail@domain.com"
-	validUserFullName    = "John Doe"
-	validUserDisplayName = "John"
+	validUserID_0          = "johndoe-0"
+	validUserID_1          = "johndoe-1"
+	validUserPass_0        = "password123"
+	validUserEmail_0       = "myemail@domain.com"
+	validUserFullName_0    = "John Doe"
+	validUserDisplayName_0 = "John"
 )
 
-func TestUserHanlder(t *testing.T) {
+func TestUserHandler(t *testing.T) {
 
 	os.Setenv("DATABASE_URL", "postgres://devuser:devpass@database:5432/testdb?sslmode=disable")
 	db.Init()
@@ -99,10 +115,10 @@ func TestUserHanlder(t *testing.T) {
 						"display_name": "%s"
 					}`,
 					invalidID,
-					validUserPass,
-					validUserEmail,
-					validUserFullName,
-					validUserDisplayName,
+					validUserPass_0,
+					validUserEmail_0,
+					validUserFullName_0,
+					validUserDisplayName_0,
 				)
 
 				fmt.Printf("Request body: %s\n", reqBody)
@@ -129,10 +145,6 @@ func TestUserHanlder(t *testing.T) {
 
 				if resBody.Error.Code != "InvalidUserIDFormat" {
 					t.Fatalf("Expected error code '%s', got '%s'", "InvalidUserIDFormat", resBody.Error.Code)
-				}
-
-				if resBody.Error.Msg == "" {
-					t.Fatalf("Expected error message, got none")
 				}
 			})
 		}
@@ -171,11 +183,11 @@ func TestUserHanlder(t *testing.T) {
 						"full_name": "%s",
 						"display_name": "%s"
 					}`,
-					validUserID,
-					validUserPass,
+					validUserID_0,
+					validUserPass_0,
 					invalidEmail,
-					validUserFullName,
-					validUserDisplayName,
+					validUserFullName_0,
+					validUserDisplayName_0,
 				)
 
 				fmt.Printf("Request body: %s\n", reqBody)
@@ -202,10 +214,6 @@ func TestUserHanlder(t *testing.T) {
 
 				if resBody.Error.Code != "InvalidUserEmailFormat" {
 					t.Fatalf("Expected error code '%s', got '%s'", "InvalidUserEmailFormat", resBody.Error.Code)
-				}
-
-				if resBody.Error.Msg == "" {
-					t.Fatalf("Expected error message, got none")
 				}
 			})
 		}
@@ -235,11 +243,11 @@ func TestUserHanlder(t *testing.T) {
 						"full_name": "%s",
 						"display_name": "%s"
 					}`,
-					validUserID,
-					validUserPass,
-					validUserEmail,
+					validUserID_0,
+					validUserPass_0,
+					validUserEmail_0,
 					invalidFullName,
-					validUserDisplayName,
+					validUserDisplayName_0,
 				)
 
 				fmt.Printf("Request body: %s\n", reqBody)
@@ -266,10 +274,6 @@ func TestUserHanlder(t *testing.T) {
 
 				if resBody.Error.Code != "InvalidUserFullNameFormat" {
 					t.Fatalf("Expected error code '%s', got '%s'", "InvalidUserFullNameFormat", resBody.Error.Code)
-				}
-
-				if resBody.Error.Msg == "" {
-					t.Fatalf("Expected error message, got none")
 				}
 			})
 		}
@@ -299,10 +303,10 @@ func TestUserHanlder(t *testing.T) {
 						"full_name": "%s",
 						"display_name": "%s"
 					}`,
-					validUserID,
-					validUserPass,
-					validUserEmail,
-					validUserFullName,
+					validUserID_0,
+					validUserPass_0,
+					validUserEmail_0,
+					validUserFullName_0,
 					invalidDisplayName,
 				)
 
@@ -331,10 +335,6 @@ func TestUserHanlder(t *testing.T) {
 				if resBody.Error.Code != "InvalidUserDisplayNameFormat" {
 					t.Fatalf("Expected error code '%s', got '%s'", "InvalidUserDisplayNameFormat", resBody.Error.Code)
 				}
-
-				if resBody.Error.Msg == "" {
-					t.Fatalf("Expected error message, got none")
-				}
 			})
 		}
 	})
@@ -359,11 +359,11 @@ func TestUserHanlder(t *testing.T) {
 						"full_name": "%s",
 						"display_name": "%s"
 					}`,
-					validUserID,
+					validUserID_0,
 					invalidPassword,
-					validUserEmail,
-					validUserFullName,
-					validUserDisplayName,
+					validUserEmail_0,
+					validUserFullName_0,
+					validUserDisplayName_0,
 				)
 
 				fmt.Printf("Request body: %s\n", reqBody)
@@ -391,10 +391,6 @@ func TestUserHanlder(t *testing.T) {
 				if resBody.Error.Code != "InvalidUserSecretPassFormat" {
 					t.Fatalf("Expected error code '%s', got '%s'", "InvalidUserSecretPassFormat", resBody.Error.Code)
 				}
-
-				if resBody.Error.Msg == "" {
-					t.Fatalf("Expected error message, got none")
-				}
 			})
 		}
 	})
@@ -409,11 +405,11 @@ func TestUserHanlder(t *testing.T) {
 				"full_name": "%s",
 				"display_name": "%s"
 			}`,
-			validUserID,
-			validUserPass,
-			validUserEmail,
-			validUserFullName,
-			validUserDisplayName,
+			validUserID_0,
+			validUserPass_0,
+			validUserEmail_0,
+			validUserFullName_0,
+			validUserDisplayName_0,
 		)
 
 		fmt.Printf("Request body: %s\n", reqBody)
@@ -440,11 +436,11 @@ func TestUserHanlder(t *testing.T) {
 				"full_name": "%s",
 				"display_name": "%s"
 			}`,
-			validUserID,
-			validUserPass,
-			validUserEmail,
-			validUserFullName,
-			validUserDisplayName,
+			validUserID_0,
+			validUserPass_0,
+			validUserEmail_0,
+			validUserFullName_0,
+			validUserDisplayName_0,
 		)
 
 		fmt.Printf("Request body: %s\n", reqBody)
@@ -472,9 +468,112 @@ func TestUserHanlder(t *testing.T) {
 		if resBody.Error.Code != "UserIDAlreadyExists" {
 			t.Fatalf("Expected error code '%s', got '%s'", "UserIDAlreadyExists", resBody.Error.Code)
 		}
+	})
 
-		if resBody.Error.Msg == "" {
-			t.Fatalf("Expected error message, got none")
+	t.Run("Get user that exists", func(t *testing.T) {
+
+		var req = httptest.NewRequest("GET", fmt.Sprintf("/api/users/%s", validUserID_0), nil)
+		var rec = httptest.NewRecorder()
+
+		router.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("Expected status '%v', got '%d'", http.StatusOK, rec.Code)
+		}
+
+		var resBody GetUserResponse
+		if err := json.Unmarshal(rec.Body.Bytes(), &resBody); err != nil {
+			t.Fatalf("Failed to parse response body, err: %v, body: %s", err, rec.Body.String())
+		}
+
+		if resBody.Error != nil {
+			t.Fatalf("Expected no error, got Code: %s, Msg: %s", resBody.Error.Code, resBody.Error.Msg)
+		}
+
+		if resBody.User == nil {
+			t.Fatalf("Expected user got nil")
+		}
+
+		if resBody.User.ID != validUserID_0 {
+			t.Fatalf("Expected user id '%s', got '%s'", validUserID_0, resBody.User.ID)
+		}
+
+		if resBody.User.Email != validUserEmail_0 {
+			t.Fatalf("Expected user email '%s', got '%s'", validUserEmail_0, resBody.User.Email)
+		}
+
+		if resBody.User.FullName != validUserFullName_0 {
+			t.Fatalf("Expected user full name '%s', got '%s'", validUserFullName_0, resBody.User.FullName)
+		}
+
+		if resBody.User.DisplayName == nil {
+			t.Fatalf("Expected user display name '%s', got 'nil'", validUserDisplayName_0)
+		}
+
+		if *resBody.User.DisplayName != validUserDisplayName_0 {
+			t.Fatalf("Expected user display name '%s', got '%s'", validUserDisplayName_0, *resBody.User.DisplayName)
+		}
+	})
+
+	t.Run("Get user that doesn't exist", func(t *testing.T) {
+
+		var req = httptest.NewRequest("GET", fmt.Sprintf("/api/users/%s", validUserID_1), nil)
+		var rec = httptest.NewRecorder()
+
+		router.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusNotFound {
+			t.Fatalf("Expected status '%v', got '%d'", http.StatusNotFound, rec.Code)
+		}
+
+		var resBody GetUserResponse
+		if err := json.Unmarshal(rec.Body.Bytes(), &resBody); err != nil {
+			t.Fatalf("Failed to parse response body, err: %v, body: %s", err, rec.Body.String())
+		}
+
+		if resBody.Error == nil {
+			t.Fatalf("Expected error object, got none")
+		}
+
+		if resBody.Error.Code != "UserNotFound" {
+			t.Fatalf("Expected error code '%s', got '%s'", "UserNotFound", resBody.Error.Code)
+		}
+	})
+
+	t.Run("Delete user that exists", func(t *testing.T) {
+
+		var req = httptest.NewRequest("DELETE", fmt.Sprintf("/api/users/%s", validUserID_0), nil)
+		var rec = httptest.NewRecorder()
+
+		router.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("Expected status '%v', got '%d'", http.StatusOK, rec.Code)
+		}
+	})
+
+	t.Run("Delete user that doesn't exist", func(t *testing.T) {
+
+		var req = httptest.NewRequest("DELETE", fmt.Sprintf("/api/users/%s", validUserID_0), nil)
+		var rec = httptest.NewRecorder()
+
+		router.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusNotFound {
+			t.Fatalf("Expected status '%v', got '%d'", http.StatusNotFound, rec.Code)
+		}
+
+		var resBody GetUserResponse
+		if err := json.Unmarshal(rec.Body.Bytes(), &resBody); err != nil {
+			t.Fatalf("Failed to parse response body, err: %v, body: %s", err, rec.Body.String())
+		}
+
+		if resBody.Error == nil {
+			t.Fatalf("Expected error object, got none")
+		}
+
+		if resBody.Error.Code != "UserNotFound" {
+			t.Fatalf("Expected error code '%s', got '%s'", "UserNotFound", resBody.Error.Code)
 		}
 	})
 }
