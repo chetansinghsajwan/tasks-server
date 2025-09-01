@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 
@@ -72,8 +71,6 @@ func TestUserHandler(t *testing.T) {
 		Pool: db.Pool,
 	}
 
-	log.SetOutput(os.Stdout)
-
 	var router = routes.SetupRouter()
 
 	t.Run("Create user with invalid ids", func(t *testing.T) {
@@ -104,7 +101,12 @@ func TestUserHandler(t *testing.T) {
 
 		for _, invalidID := range invalidIDs {
 
+			// Capture the range var
+			var invalidID = invalidID
+
 			t.Run(fmt.Sprintf("Create user with invalid id '%s'", invalidID), func(t *testing.T) {
+
+				t.Parallel()
 
 				var reqBody = fmt.Sprintf(
 					`{
@@ -173,7 +175,12 @@ func TestUserHandler(t *testing.T) {
 
 		for _, invalidEmail := range invalidEmails {
 
+			// Capture the range var
+			var invalidEmail = invalidEmail
+
 			t.Run(fmt.Sprintf("Create user with invalid email '%s'", invalidEmail), func(t *testing.T) {
+
+				t.Parallel()
 
 				var reqBody = fmt.Sprintf(
 					`{
@@ -233,7 +240,12 @@ func TestUserHandler(t *testing.T) {
 
 		for _, invalidFullName := range invalidFullNames {
 
+			// Capture the range var
+			var invalidFullName = invalidFullName
+
 			t.Run(fmt.Sprintf("Create user with invalid full name '%s'", invalidFullName), func(t *testing.T) {
+
+				t.Parallel()
 
 				var reqBody = fmt.Sprintf(
 					`{
@@ -293,7 +305,12 @@ func TestUserHandler(t *testing.T) {
 
 		for _, invalidDisplayName := range invalidDisplayNames {
 
+			// Capture the range var
+			var invalidDisplayName = invalidDisplayName
+
 			t.Run(fmt.Sprintf("Create user with invalid display name '%s'", invalidDisplayName), func(t *testing.T) {
+
+				t.Parallel()
 
 				var reqBody = fmt.Sprintf(
 					`{
@@ -349,7 +366,12 @@ func TestUserHandler(t *testing.T) {
 
 		for _, invalidPassword := range invalidPasswords {
 
+			// Capture the range var
+			var invalidPassword = invalidPassword
+
 			t.Run(fmt.Sprintf("Create user with invalid password '%s'", invalidPassword), func(t *testing.T) {
+
+				t.Parallel()
 
 				var reqBody = fmt.Sprintf(
 					`{
