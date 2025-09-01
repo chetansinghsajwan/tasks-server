@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"tasks/errorcodes"
@@ -53,7 +54,10 @@ func CreateUser(c *gin.Context) {
 	if err = c.BindJSON(&body); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
+			"error": gin.H{
+				"code": errorcodes.Internal,
+				"msg":  err.Error(),
+			},
 		})
 		return
 	}
@@ -78,7 +82,8 @@ func CreateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg": "user id is null",
+					"code": errorcodes.UserIDNull,
+					"msg":  "user id is null",
 				},
 			})
 			return
@@ -87,7 +92,8 @@ func CreateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg": fmt.Sprintf("user with id '%s' already exists", body.ID),
+					"code": errorcodes.UserIDAlreadyExists,
+					"msg":  fmt.Sprintf("user with id '%s' already exists", body.ID),
 				},
 			})
 			return
@@ -96,7 +102,8 @@ func CreateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg": fmt.Sprintf("user with email '%s' already exists", body.Email),
+					"code": errorcodes.UserEmailAlreadyExists,
+					"msg":  fmt.Sprintf("user with email '%s' already exists", body.Email),
 				},
 			})
 			return
@@ -105,6 +112,7 @@ func CreateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
+					"code": errorcodes.InvalidUserIDFormat,
 					"msg":  fmt.Sprintf("user id '%s' format is invalid", body.ID),
 					"hint": invalidUserIDFormatHint,
 				},
@@ -115,6 +123,7 @@ func CreateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
+					"code": errorcodes.InvalidUserEmailFormat,
 					"msg":  fmt.Sprintf("user email '%s' format is invalid", body.Email),
 					"hint": invalidUserEmailFormatHint,
 				},
@@ -125,6 +134,7 @@ func CreateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
+					"code": errorcodes.InvalidUserFullNameFormat,
 					"msg":  fmt.Sprintf("user full name '%s' format is invalid", body.FullName),
 					"hint": invalidUserFullNameFormatHint,
 				},
@@ -135,6 +145,7 @@ func CreateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
+					"code": errorcodes.InvalidUserDisplayNameFormat,
 					"msg":  fmt.Sprintf("user display name '%s' format is invalid", *body.DisplayName),
 					"hint": invalidUserDisplayNameFormatHint,
 				},
@@ -143,9 +154,12 @@ func CreateUser(c *gin.Context) {
 
 		default:
 
+			log.Printf("HANDLER: CreateUser: unexpected error: %v", serr)
+
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": gin.H{
-					"msg": "internal server error",
+					"code": errorcodes.Internal,
+					"msg":  "internal server error",
 				},
 			})
 			return

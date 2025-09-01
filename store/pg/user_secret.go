@@ -17,7 +17,7 @@ const invalidUserSecretPassFormatHint string = ""
 func (st PostgresStore) CreateUserSecret(ctx context.Context, args store.CreateUserSecretParams) *store.StoreError {
 
 	const query = `
-		insert into user_secrets (id, pass)
+		insert into user_secrets (id, value)
 		values ($1, $2)
 	`
 
@@ -32,7 +32,7 @@ func (st PostgresStore) CreateUserSecret(ctx context.Context, args store.CreateU
 
 				return &store.StoreError{
 					Code:         errorcodes.InvalidUserSecretPassFormat,
-					Msg:          fmt.Sprintf("user secret pass '%s' format is not correct. hint: %s", args.Pass, invalidUserSecretPassFormatHint),
+					Msg:          fmt.Sprintf("user secret value '%s' format is not correct. hint: %s", args.Pass, invalidUserSecretPassFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -51,7 +51,7 @@ func (st PostgresStore) CreateUserSecret(ctx context.Context, args store.CreateU
 func (st PostgresStore) GetUserSecret(ctx context.Context, id string) (*store.UserSecret, *store.StoreError) {
 
 	const query = `
-		select id, pass
+		select id, value
 		from user_secrets
 		where id = $1
 	`
@@ -85,7 +85,7 @@ func (st PostgresStore) UpdateUserSecret(ctx context.Context, id string, args st
 
 	const query = `
 		update users set
-		pass = $2
+		value = $2
 		where id = $1
 	`
 
@@ -101,7 +101,7 @@ func (st PostgresStore) UpdateUserSecret(ctx context.Context, id string, args st
 
 				return &store.StoreError{
 					Code:         errorcodes.InvalidUserSecretPassFormat,
-					Msg:          fmt.Sprintf("user secret pass '%s' format is not correct. hint: %s", args.Pass, invalidUserSecretPassFormatHint),
+					Msg:          fmt.Sprintf("user secret value '%s' format is not correct. hint: %s", args.Pass, invalidUserSecretPassFormatHint),
 					WrappedError: err,
 				}
 			}

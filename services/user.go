@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"log"
 	"tasks/errorcodes"
 	"tasks/store"
 
@@ -73,6 +74,8 @@ func CreateUser(ctx ServiceContext, args CreateUserParams) *ServiceError {
 			}
 
 		default:
+			log.Printf("SERVICE: CreateUser: unexpected error: %v", serr)
+
 			return &ServiceError{
 				Code: errorcodes.Internal,
 			}
@@ -108,6 +111,9 @@ func CreateUser(ctx ServiceContext, args CreateUserParams) *ServiceError {
 			}
 
 		default:
+
+			log.Printf("SERVICE: CreateUser: unexpected error: %v", serr)
+
 			return &ServiceError{
 				Code: errorcodes.Internal,
 			}

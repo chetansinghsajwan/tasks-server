@@ -1,11 +1,11 @@
 create or replace function reinitialize_schema()
 returns void as $$
 begin
-    drop table if exists list_access;
-    drop table if exists tasks;
-    drop table if exists lists;
-    drop table if exists users;
-    drop table if exists user_secrets;
+    drop table if exists list_access cascade;
+    drop table if exists tasks cascade;
+    drop table if exists lists cascade;
+    drop table if exists users cascade;
+    drop table if exists user_secrets cascade;
     drop type if exists list_access_type;
     drop type if exists user_id_type;
     drop type if exists list_name_type;
@@ -36,8 +36,12 @@ begin
             -- ensure no empty whitespace value
             length(trim(email)) != 0
 
-            -- ensure valid email format with lowercase alphanumeric chars and some symbols only
-            and email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
+            -- ensure valid email format:
+            -- - lowercase only
+            -- - local part starts/ends with alnum, allows ._%+-
+            -- - domain part allows alnum, dot, hyphen
+            -- - TLD at least 2 chars
+            and email ~ '^[a-z0-9](?:[a-z0-9._%+-]*[a-z0-9])?@[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,}$'
         ),
 
         constraint users_full_name_validation check (
@@ -47,6 +51,9 @@ begin
 
             -- ensure no leading and trailing spaces
             and full_name = btrim(full_name)
+
+            -- forbid tabs, newlines, carriage returns
+            and full_name !~ '[\t\n\r]'
         ),
 
         constraint users_display_name_validation check (
@@ -58,6 +65,9 @@ begin
 
                 -- ensure no leading and trailing spaces
                 and display_name = btrim(display_name)
+
+                -- forbid tabs, newlines, carriage returns
+                and full_name !~ '[\t\n\r]'
             )
         )
     );

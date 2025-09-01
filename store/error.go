@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"tasks/errorcodes"
 )
 
@@ -11,7 +12,7 @@ type StoreError struct {
 }
 
 func (e *StoreError) Error() string {
-	return e.Msg
+	return fmt.Sprintf("StoreError(%v, %s, %v)", e.Code, e.Msg, e.WrappedError)
 }
 
 func (e *StoreError) Unwrap() error {
