@@ -79,7 +79,9 @@ begin
         constraint user_secrets_pk primary key (id),
 
         constraint user_secrets_id_fk foreign key (id)
-            references users(id) on delete cascade,
+            references users(id)
+            on update cascade
+            on delete cascade,
 
         constraint user_secrets_value_format_check check (
             length(trim(value)) != 0

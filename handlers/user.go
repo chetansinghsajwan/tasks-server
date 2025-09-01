@@ -22,10 +22,10 @@ type CreateUserBody struct {
 }
 
 type UpdateUserBody struct {
-	ID          *string `json:"id"`
-	Email       *string `json:"email"`
-	FullName    *string `json:"full_name"`
-	DisplayName *string `json:"display_name"`
+	ID          *string  `json:"id"`
+	Email       *string  `json:"email"`
+	FullName    *string  `json:"full_name"`
+	DisplayName **string `json:"display_name"`
 }
 
 const (
@@ -203,6 +203,7 @@ func GetUser(c *gin.Context) {
 			return
 
 		default:
+
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": gin.H{
 					"code": errorcodes.Internal,
@@ -241,7 +242,8 @@ func UpdateUser(c *gin.Context) {
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": gin.H{
-				"msg": "user id must not be empty",
+				"code": errorcodes.UserIDNull,
+				"msg":  "user id must not be empty",
 			},
 		})
 		return
@@ -251,10 +253,14 @@ func UpdateUser(c *gin.Context) {
 	var body UpdateUserBody
 	if err = c.BindJSON(&body); err != nil {
 
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		log.Printf("HANDLER: UpdateUser: %s", err.Error())
 
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": gin.H{
+				"code": errorcodes.Internal,
+				"msg":  err.Error(),
+			},
+		})
 		return
 	}
 
@@ -268,18 +274,29 @@ func UpdateUser(c *gin.Context) {
 			ID:          body.ID,
 			Email:       body.Email,
 			FullName:    body.FullName,
-			DisplayName: &body.DisplayName,
+			DisplayName: body.DisplayName,
 		},
 	)
 
 	if serr != nil {
 
 		switch serr.Code {
+		case errorcodes.UserNotFound:
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": gin.H{
+					"code": serr.Code,
+					"msg":  "user not found",
+				},
+			})
+			return
+
 		case errorcodes.UserIDNull:
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg": "user id is null",
+					"code": serr.Code,
+					"msg":  "user id is null",
 				},
 			})
 			return
@@ -288,7 +305,8 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg": fmt.Sprintf("user with id '%s' already exists", *body.ID),
+					"code": serr.Code,
+					"msg":  fmt.Sprintf("user with id '%s' already exists", *body.ID),
 				},
 			})
 			return
@@ -297,7 +315,8 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg": fmt.Sprintf("user with email '%s' already exists", *body.Email),
+					"code": serr.Code,
+					"msg":  fmt.Sprintf("user with email '%s' already exists", *body.Email),
 				},
 			})
 			return
@@ -306,6 +325,7 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
+					"code": serr.Code,
 					"msg":  fmt.Sprintf("user id '%s' format is invalid", *body.ID),
 					"hint": invalidUserIDFormatHint,
 				},
@@ -316,6 +336,7 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
+					"code": serr.Code,
 					"msg":  fmt.Sprintf("user email '%s' format is invalid", *body.Email),
 					"hint": invalidUserEmailFormatHint,
 				},
@@ -326,6 +347,7 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
+					"code": serr.Code,
 					"msg":  fmt.Sprintf("user full name '%s' format is invalid", *body.FullName),
 					"hint": invalidUserFullNameFormatHint,
 				},
@@ -336,7 +358,8 @@ func UpdateUser(c *gin.Context) {
 
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": gin.H{
-					"msg":  fmt.Sprintf("user display name '%s' format is invalid", *body.DisplayName),
+					"code": serr.Code,
+					"msg":  fmt.Sprintf("user display name '%s' format is invalid", **body.DisplayName),
 					"hint": invalidUserDisplayNameFormatHint,
 				},
 			})
@@ -344,9 +367,12 @@ func UpdateUser(c *gin.Context) {
 
 		default:
 
+			log.Printf("HANDLER: UpdateUser: unexpected error: %v", serr)
+
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": gin.H{
-					"msg": "internal server error",
+					"code": errorcodes.Internal,
+					"msg":  "internal server error",
 				},
 			})
 			return

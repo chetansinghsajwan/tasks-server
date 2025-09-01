@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"tasks/errorcodes"
 	"tasks/store"
@@ -254,7 +255,12 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 		}
 
 		queryBuilder.WriteString(fmt.Sprintf(" display_name = $%d", len(queryArgs)+1))
-		queryArgs = append(queryArgs, *args.DisplayName)
+
+		if *args.DisplayName == nil {
+			queryArgs = append(queryArgs, "null")
+		} else {
+			queryArgs = append(queryArgs, **args.DisplayName)
+		}
 	}
 
 	// There were no updates
@@ -263,6 +269,10 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 	}
 
 	queryBuilder.WriteString(" WHERE id = $1")
+
+	log.Printf("STORE: UpdateUser: Query: %s", queryBuilder.String())
+	log.Printf("STORE: UpdateUser: QueryArgs: %+v", queryArgs)
+	log.Printf("STORE: UpdateUser: args: %+v", args)
 
 	// Execute the query
 	var cmd pgconn.CommandTag
@@ -279,7 +289,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 
 				return &store.StoreError{
 					Code:         errorcodes.InvalidUserIDFormat,
-					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", **args.ID, invalidUserIDFormatHint),
+					Msg:          fmt.Sprintf("user id '%s' format is not correct. hint: %s", *args.ID, invalidUserIDFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -288,7 +298,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 
 				return &store.StoreError{
 					Code:         errorcodes.UserIDAlreadyExists,
-					Msg:          fmt.Sprintf("user id '%s' already exists", **args.ID),
+					Msg:          fmt.Sprintf("user id '%s' already exists", *args.ID),
 					WrappedError: err,
 				}
 			}
@@ -307,7 +317,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 
 				return &store.StoreError{
 					Code:         errorcodes.InvalidUserEmailFormat,
-					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", **args.Email, invalidUserEmailFormatHint),
+					Msg:          fmt.Sprintf("user email '%s' format is not correct. hint: %s", *args.Email, invalidUserEmailFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -316,7 +326,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 
 				return &store.StoreError{
 					Code:         errorcodes.UserEmailAlreadyExists,
-					Msg:          fmt.Sprintf("user email '%s' already exists", **args.Email),
+					Msg:          fmt.Sprintf("user email '%s' already exists", *args.Email),
 					WrappedError: err,
 				}
 			}
@@ -325,7 +335,7 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 
 				return &store.StoreError{
 					Code:         errorcodes.InvalidUserFullNameFormat,
-					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", **args.FullName, invalidUserFullNameFormatHint),
+					Msg:          fmt.Sprintf("user full name '%s' format is not correct. hint: %s", *args.FullName, invalidUserFullNameFormatHint),
 					WrappedError: err,
 				}
 			}
@@ -339,6 +349,8 @@ func (st PostgresStore) UpdateUser(ctx context.Context, id string, args store.Up
 				}
 			}
 		}
+
+		log.Printf("STORE: UpdateUser: unknown error: %v", err)
 
 		return &store.StoreError{
 			Code:         errorcodes.Unknown,

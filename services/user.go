@@ -153,9 +153,9 @@ func GetUser(ctx ServiceContext, id string) (*User, *ServiceError) {
 func UpdateUser(ctx ServiceContext, id string, args UpdateUserParams) *ServiceError {
 
 	var serr *store.StoreError = ST.UpdateUser(ctx.Ctx, id, store.UpdateUserParams{
-		ID:          &args.ID,
-		Email:       &args.Email,
-		FullName:    &args.FullName,
+		ID:          args.ID,
+		Email:       args.Email,
+		FullName:    args.FullName,
 		DisplayName: args.DisplayName,
 	})
 
@@ -175,10 +175,14 @@ func UpdateUser(ctx ServiceContext, id string, args UpdateUserParams) *ServiceEr
 			return &ServiceError{
 				Code: serr.Code,
 			}
-		}
 
-		return &ServiceError{
-			Code: errorcodes.Internal,
+		default:
+
+			log.Printf("SERVICE: UpdateUser: %s", serr.Code)
+
+			return &ServiceError{
+				Code: errorcodes.Internal,
+			}
 		}
 	}
 

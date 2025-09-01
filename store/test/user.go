@@ -286,7 +286,7 @@ func TestUserStore(t *testing.T, st store.Store) {
 	// ---------------------------------------------------------------------------------------------
 
 	serr = st.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
-		FullName: utils.DoublePtr(" "),
+		FullName: utils.Ptr(" "),
 	})
 
 	if serr == nil || serr.Code != errorcodes.InvalidUserFullNameFormat {
@@ -298,9 +298,9 @@ func TestUserStore(t *testing.T, st store.Store) {
 	// ---------------------------------------------------------------------------------------------
 
 	serr = st.UpdateUser(ctx, User0_ID, store.UpdateUserParams{
-		ID:          utils.Ptr(&User1_ID),
-		Email:       utils.Ptr(&User1_Email),
-		FullName:    utils.Ptr(&User1_FullName),
+		ID:          &User1_ID,
+		Email:       &User1_Email,
+		FullName:    &User1_FullName,
 		DisplayName: utils.Ptr(&User1_DisplayName),
 	})
 
