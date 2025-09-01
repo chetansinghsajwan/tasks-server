@@ -11,27 +11,31 @@ func SetupRouter() *gin.Engine {
 	var r = gin.Default()
 
 	r.POST("/auth/login", handlers.Login)
-	r.POST("/api/users", handlers.CreateUser)
 
-	r.Group("/api", handlers.AuthenticateMiddleware)
+	var api = r.Group("/api")
 	{
-		r.POST("/tasks", handlers.CreateTask)
-		r.GET("/tasks/:id", handlers.GetTask)
-		r.PATCH("/tasks/:id", handlers.UpdateTask)
-		r.DELETE("/tasks/:id", handlers.DeleteTask)
+		api.POST("/users", handlers.CreateUser)
 
-		r.GET("/users/:id", handlers.GetUser)
-		r.PATCH("/users/:id", handlers.UpdateUser)
-		r.DELETE("/users/:id", handlers.DeleteUser)
+		var auth = api.Group("", handlers.AuthenticateMiddleware)
+		{
+			auth.POST("/tasks", handlers.CreateTask)
+			auth.GET("/tasks/:id", handlers.GetTask)
+			auth.PATCH("/tasks/:id", handlers.UpdateTask)
+			auth.DELETE("/tasks/:id", handlers.DeleteTask)
 
-		r.POST("/lists", handlers.CreateList)
-		r.GET("/lists/:id", handlers.GetList)
-		r.PATCH("/lists/:id", handlers.UpdateList)
-		r.DELETE("/lists/:id", handlers.DeleteList)
+			auth.GET("/users/:id", handlers.GetUser)
+			auth.PATCH("/users/:id", handlers.UpdateUser)
+			auth.DELETE("/users/:id", handlers.DeleteUser)
 
-		r.POST("/lists/access/:id", handlers.AddListAccess)
-		r.GET("/lists/access/:id", handlers.GetListAccess)
-		r.DELETE("/lists/access/:id", handlers.RemoveListAccess)
+			auth.POST("/lists", handlers.CreateList)
+			auth.GET("/lists/:id", handlers.GetList)
+			auth.PATCH("/lists/:id", handlers.UpdateList)
+			auth.DELETE("/lists/:id", handlers.DeleteList)
+
+			auth.POST("/lists/access/:id", handlers.AddListAccess)
+			auth.GET("/lists/access/:id", handlers.GetListAccess)
+			auth.DELETE("/lists/access/:id", handlers.RemoveListAccess)
+		}
 	}
 
 	return r
