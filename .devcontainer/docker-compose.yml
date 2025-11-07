@@ -9,20 +9,39 @@ services:
     depends_on:
       - database
     environment:
-      - DATABASE_URL=postgres://devuser:devpass@database:5432/devdb?sslmode=disable
+      - ENV
+      - SERVER_PORT
+      - DB_USER
+      - DB_PASS
+      - DB_NAME
+      - DB_HOST
+      - DB_PORT
+      - DB_SSL_MODE
+      - TEST_DB_USER
+      - TEST_DB_PASS
+      - TEST_DB_NAME
     command: sleep infinity
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
 
   database:
     image: docker.io/postgres:16
+    command: -p ${DB_PORT}
     restart: unless-stopped
     environment:
-      POSTGRES_USER: devuser
-      POSTGRES_PASSWORD: devpass
-      POSTGRES_DB: devdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - DB_USER
+      - DB_PASS
+      - DB_NAME
+      - TEST_DB_USER
+      - TEST_DB_PASS
+      - TEST_DB_NAME
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:${DB_PORT}"
     volumes:
-      - ./dbinit:/docker-entrypoint-initdb.d
+      - ../tasks-server/.devcontainer/dbinit:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
 
   pgadmin:
@@ -31,10 +50,10 @@ services:
     depends_on:
       - database
     ports:
-      - "8080:80"
+      - "${PGADMIN_PORT}:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@local.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS}
     volumes:
       - pgadmin-data:/var/lib/pgadmin
 

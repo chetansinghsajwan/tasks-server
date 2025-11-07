@@ -140,3 +140,5 @@ begin
     );
 end;
 $$ language plpgsql;
+
+select reinitialize_schema();

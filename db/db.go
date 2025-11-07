@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,10 +12,47 @@ var Pool *pgxpool.Pool
 
 func Init() {
 
-	var connString = os.Getenv("DATABASE_URL")
-	if connString == "" {
-		panic("DATABASE_URL environment variable is not set")
+	var dbUser = os.Getenv("DB_USER")
+	if dbUser == "" {
+		panic("DB_USER environment variable is not set")
 	}
+
+	var dbPassword = os.Getenv("DB_PASSWORD")
+	if dbPassword == "" {
+		panic("DB_PASSWORD environment variable is not set")
+	}
+
+	var dbName = os.Getenv("DB_NAME")
+	if dbName == "" {
+		panic("DB_NAME environment variable is not set")
+	}
+
+	var dbHost = os.Getenv("DB_HOST")
+	if dbHost == "" {
+		panic("DB_HOST environment variable is not set")
+	}
+
+	var dbPort = os.Getenv("DB_PORT")
+	if dbPort == "" {
+		panic("DB_PORT environment variable is not set")
+	}
+
+	var dbSSLMode = os.Getenv("DB_SSL_MODE")
+	if dbSSLMode == "" {
+		panic("DB_SSL_MODE environment variable is not set")
+	}
+
+	var connString = fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		dbUser,
+		dbPassword,
+		dbHost,
+		dbPort,
+		dbName,
+		dbSSLMode,
+	)
+
+	print(connString)
 
 	var ctx = context.Background()
 
