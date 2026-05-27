@@ -17,9 +17,9 @@ func Init() {
 		panic("DB_USER environment variable is not set")
 	}
 
-	var dbPassword = os.Getenv("DB_PASSWORD")
+	var dbPassword = os.Getenv("DB_PASS")
 	if dbPassword == "" {
-		panic("DB_PASSWORD environment variable is not set")
+		panic("DB_PASS environment variable is not set")
 	}
 
 	var dbName = os.Getenv("DB_NAME")
