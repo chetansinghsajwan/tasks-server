@@ -9,17 +9,17 @@ services:
     depends_on:
       - database
     environment:
-      - ENV
-      - SERVER_PORT
-      - DB_USER
-      - DB_PASS
-      - DB_NAME
-      - DB_HOST
-      - DB_PORT
-      - DB_SSL_MODE
-      - TEST_DB_USER
-      - TEST_DB_PASS
-      - TEST_DB_NAME
+      ENV:
+      SERVER_PORT:
+      DB_USER:
+      DB_PASS:
+      DB_NAME:
+      DB_HOST: database
+      DB_PORT:
+      DB_SSL_MODE:
+      TEST_DB_USER:
+      TEST_DB_PASS:
+      TEST_DB_NAME:
     command: sleep infinity
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
@@ -29,20 +29,25 @@ services:
     command: -p ${DB_PORT}
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
-      - DB_USER
-      - DB_PASS
-      - DB_NAME
-      - TEST_DB_USER
-      - TEST_DB_PASS
-      - TEST_DB_NAME
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      DB_USER:
+      DB_PASS:
+      DB_NAME:
+      TEST_DB_USER:
+      TEST_DB_PASS:
+      TEST_DB_NAME:
     ports:
       - "${DB_PORT}:${DB_PORT}"
     volumes:
-      - ../tasks-server/.devcontainer/dbinit:/docker-entrypoint-initdb.d
+      - ./dbinit:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_ADMIN_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4
