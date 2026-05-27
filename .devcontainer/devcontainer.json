@@ -1,10 +1,19 @@
 {
-  "name": "tasks-server-dev",
+  "name": "Tasks server",
   "dockerComposeFile": "docker-compose.yml",
   "service": "server",
   "workspaceFolder": "/workspace",
+  "remoteUser": "vscode",
   "forwardPorts": [
-    5432, // for postgres
-    8080 // for pgadmin
-  ]
+    5000, // server
+    5432, // postgres
+    8080  // pgadmin
+  ],
+  "customizations": {
+      "vscode": {
+          "extensions": [
+              "golang.go"
+          ]
+      }
+  }
 }
